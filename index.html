@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DAY 1 — Every day is Day 1</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#FF2D2D;--black:#0D0D0D;--white:#F8F6F2;
+  --card:#FFFFFF;--gray:#EBEBEB;--mid:#888;--border:#E4E1DB;
+  --bebas:'Bebas Neue',sans-serif;--dm:'DM Sans',sans-serif;
+}
+body{font-family:var(--dm);background:var(--white);color:var(--black);min-height:100vh;overflow-x:hidden}
+
+/* ─── ANIMATIONS ─── */
+@keyframes setupFadeIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
+@keyframes logoSlam{from{opacity:0;transform:scale(1.35) translateY(-16px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes cardRise{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pageIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideLeft{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideRight{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes heroIn{from{opacity:0;transform:scale(.96) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes stagger{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes modalUp{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(16px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes navBounce{0%{transform:scale(1)}40%{transform:scale(1.28)}70%{transform:scale(.9)}100%{transform:scale(1)}}
+@keyframes chipPop{0%{transform:scale(1)}45%{transform:scale(1.18)}100%{transform:scale(1)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ─── SETUP SCREEN ─── */
+#setup-screen{
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:2rem;background:var(--black);
+  animation:setupFadeIn .55s ease both;
+}
+.setup-logo{
+  font-family:var(--bebas);font-size:80px;color:#fff;letter-spacing:.06em;line-height:1;text-align:center;
+  animation:logoSlam .5s cubic-bezier(.22,.68,0,1.4) .15s both;
+}
+.setup-logo span{color:var(--red)}
+.setup-tagline{
+  font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#555;margin-top:4px;text-align:center;
+  animation:cardRise .4s ease .35s both;
+}
+.setup-card{
+  background:#1a1a1a;border-radius:20px;padding:28px;width:100%;max-width:420px;margin-top:36px;
+  animation:cardRise .5s cubic-bezier(.22,.68,0,1.2) .45s both;
+}
+.setup-label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#666;margin-bottom:8px}
+.setup-input{
+  width:100%;background:#0d0d0d;border:1px solid #333;border-radius:12px;
+  padding:14px 16px;font-family:var(--dm);font-size:14px;color:#fff;outline:none;
+  transition:border-color .25s, box-shadow .25s;
+}
+.setup-input:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(255,45,45,.15)}
+.setup-input::placeholder{color:#444}
+.setup-hint{font-size:11px;color:#444;margin-top:8px;line-height:1.6}
+.setup-hint a{color:#666;text-decoration:underline}
+.setup-btn{
+  width:100%;background:var(--red);color:#fff;border:none;border-radius:14px;
+  padding:16px;font-family:var(--bebas);font-size:20px;letter-spacing:.1em;
+  cursor:pointer;margin-top:20px;
+  transition:background .2s, transform .15s, box-shadow .2s;
+}
+.setup-btn:hover{background:#e01c1c;transform:translateY(-2px);box-shadow:0 6px 20px rgba(255,45,45,.35)}
+.setup-btn:active{transform:scale(.97)}
+.setup-note{font-size:11px;color:#444;text-align:center;margin-top:16px;line-height:1.6}
+
+/* ─── MAIN APP ─── */
+#app{display:none;max-width:480px;margin:0 auto;min-height:100vh;position:relative;padding-bottom:80px}
+
+/* TOP BAR */
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(248,246,242,0.95);backdrop-filter:blur(12px);
+  padding:16px 20px 12px;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.logo{font-family:var(--bebas);font-size:32px;letter-spacing:.06em;line-height:1}
+.logo span{color:var(--red)}
+.tagline{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--mid)}
+.topbar-right{display:flex;gap:10px;align-items:center}
+.settings-btn{
+  width:36px;height:36px;border-radius:50%;background:var(--gray);border:none;
+  cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;
+}
+.user-avatar{
+  width:36px;height:36px;border-radius:50%;background:var(--red);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--bebas);font-size:16px;color:#fff;letter-spacing:.05em;
+}
+
+/* NAV */
+.nav-bar{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:480px;
+  background:rgba(248,246,242,0.97);backdrop-filter:blur(16px);
+  border-top:1px solid var(--border);
+  display:flex;padding:10px 0 24px;z-index:100;
+}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;border:none;background:none}
+.nav-icon{font-size:20px;opacity:.3;transition:all .2s}
+.nav-label{font-size:9px;font-weight:700;color:var(--mid);letter-spacing:.08em;text-transform:uppercase;transition:color .2s}
+.nav-item.active .nav-icon{opacity:1;animation:navBounce .4s cubic-bezier(.22,.68,0,1.4) both}
+.nav-item.active .nav-label{color:var(--black)}
+
+/* PAGES */
+.page{display:none;padding:0 0 20px}
+.page.active{display:block;animation:pageIn .35s cubic-bezier(.22,.68,0,1.2) both}
+@keyframes pageIn{
+  from{opacity:0;transform:translateY(18px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.page.slide-left{animation:slideLeft .3s cubic-bezier(.4,0,.2,1) both}
+.page.slide-right{animation:slideRight .3s cubic-bezier(.4,0,.2,1) both}
+@keyframes slideLeft{
+  from{opacity:0;transform:translateX(32px)}
+  to{opacity:1;transform:translateX(0)}
+}
+@keyframes slideRight{
+  from{opacity:0;transform:translateX(-32px)}
+  to{opacity:1;transform:translateX(0)}
+}
+
+/* SECTION LABEL */
+.sec-label{
+  font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--mid);
+  padding:0 20px;margin:22px 0 10px;
+}
+
+/* HERO BANNER */
+.hero{
+  margin:16px 20px 0;background:var(--black);border-radius:24px;
+  padding:22px;position:relative;overflow:hidden;
+  animation:heroIn .5s cubic-bezier(.22,.68,0,1.15) .1s both;
+  transition:transform .2s;
+}
+.hero:active{transform:scale(.99)}
+.hero-date{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#555;margin-bottom:6px}
+.hero-title{font-family:var(--bebas);font-size:52px;color:#fff;letter-spacing:.04em;line-height:1}
+.hero-title .red{color:var(--red)}
+.hero-sub{font-size:12px;color:#666;margin-top:8px}
+.hero-badge{
+  position:absolute;top:18px;right:18px;
+  background:var(--red);color:#fff;
+  font-family:var(--bebas);font-size:15px;letter-spacing:.1em;
+  padding:6px 12px;border-radius:10px;
+}
+.hero-stats{display:flex;gap:0;margin-top:18px;padding-top:16px;border-top:1px solid #1f1f1f}
+.hstat{flex:1;padding-right:16px}
+.hstat+.hstat{border-left:1px solid #1f1f1f;padding-left:16px;padding-right:0}
+.hstat-num{font-family:var(--bebas);font-size:30px;color:#fff;letter-spacing:.04em;line-height:1}
+.hstat-label{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.1em;margin-top:2px}
+
+/* MUSCLE CHIPS */
+.chip-scroll{display:flex;gap:8px;padding:0 20px;overflow-x:auto}
+.chip-scroll::-webkit-scrollbar{display:none}
+.chip{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:8px 14px;font-size:12px;font-weight:600;white-space:nowrap;
+  cursor:pointer;transition:all .18s;flex-shrink:0;
+}
+.chip.active{background:var(--black);color:#fff;border-color:var(--black)}
+.chip.red{background:var(--red);color:#fff;border-color:var(--red)}
+
+/* QUICK GRID */
+.qgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px}
+.qcard{
+  background:var(--card);border:1px solid var(--border);border-radius:18px;
+  padding:16px;cursor:pointer;
+  transition:border-color .18s, transform .18s, box-shadow .18s;
+}
+.qcard:hover{border-color:var(--red);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.qcard:active{transform:scale(.96)}
+.qcard.dark{background:var(--black)}
+.qcard-icon{font-size:24px;margin-bottom:8px}
+.qcard-title{font-weight:700;font-size:13px}
+.qcard-sub{font-size:11px;color:var(--mid);margin-top:2px}
+.qcard.dark .qcard-title{color:#fff}
+.qcard.dark .qcard-sub{color:#555}
+
+/* GOAL BAR */
+.goal-card{
+  margin:0 20px;background:var(--card);border-radius:18px;
+  padding:16px;border:1px solid var(--border);
+}
+.goal-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.goal-name{font-weight:700;font-size:13px}
+.goal-pct{font-family:var(--bebas);font-size:24px;color:var(--red);letter-spacing:.04em}
+.bar-track{background:var(--gray);height:6px;border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;background:var(--red);transition:width .6s ease}
+.goal-note{font-size:11px;color:var(--mid);margin-top:8px}
+
+/* ─── EQUIPMENT PAGE ─── */
+.search-wrap{margin:12px 20px 0;background:var(--card);border-radius:14px;border:1px solid var(--border);display:flex;align-items:center;padding:10px 14px;gap:8px}
+.search-wrap input{border:none;background:none;outline:none;font-family:var(--dm);font-size:14px;color:var(--black);flex:1}
+.search-wrap input::placeholder{color:#bbb}
+.filter-row{display:flex;gap:8px;padding:0 20px;overflow-x:auto;margin:10px 0}
+.filter-row::-webkit-scrollbar{display:none}
+.fpill{
+  background:var(--card);border:1px solid var(--border);border-radius:20px;
+  padding:7px 14px;font-size:11px;font-weight:700;letter-spacing:.05em;
+  text-transform:uppercase;white-space:nowrap;cursor:pointer;transition:all .18s;flex-shrink:0;
+}
+.fpill.active{background:var(--black);color:#fff;border-color:var(--black)}
+.equip-list{padding:0 20px;display:flex;flex-direction:column;gap:10px}
+.ecard{
+  background:var(--card);border-radius:18px;padding:14px 16px;
+  border:1px solid var(--border);display:flex;gap:12px;
+  align-items:center;cursor:pointer;
+  transition:border-color .18s, transform .18s, box-shadow .18s;
+}
+.ecard:hover{border-color:var(--red);transform:translateX(4px);box-shadow:0 4px 16px rgba(255,45,45,.08)}
+.ecard:active{transform:scale(.98)}
+.ecard-icon{
+  width:50px;height:50px;background:var(--gray);border-radius:14px;
+  display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;
+}
+.ecard-info{flex:1}
+.ecard-name{font-weight:700;font-size:14px}
+.ecard-zh{font-size:11px;color:var(--mid);margin-top:2px}
+.tags{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap}
+.tag{font-size:10px;font-weight:700;letter-spacing:.04em;padding:3px 9px;border-radius:7px}
+.tag.p{background:var(--red);color:#fff}
+.tag.s{background:var(--gray);color:#666}
+.tag.t{background:var(--black);color:#fff}
+
+/* ─── LOG PAGE ─── */
+.log-toprow{display:flex;justify-content:space-between;align-items:center;padding:0 20px;margin-bottom:4px}
+.log-month{font-size:11px;color:var(--mid);font-weight:700;text-transform:uppercase;letter-spacing:.1em}
+.add-btn{
+  background:var(--red);color:#fff;border:none;border-radius:10px;
+  padding:8px 16px;font-family:var(--bebas);font-size:15px;letter-spacing:.08em;cursor:pointer;
+  transition:transform .15s, box-shadow .15s;
+}
+.add-btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(255,45,45,.35)}
+.add-btn:active{transform:scale(.95)}
+.log-block{margin:0 20px;border-radius:20px;overflow:hidden;border:1px solid var(--border);margin-bottom:12px}
+.lblock-head{
+  background:var(--black);padding:14px 16px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.lblock-title{font-family:var(--bebas);font-size:17px;color:#fff;letter-spacing:.06em}
+.lblock-meta{font-size:11px;color:#555;margin-top:2px}
+.lblock-status{font-size:11px;font-weight:700;color:var(--red)}
+.lblock-done{font-size:11px;font-weight:700;color:#555}
+.log-ex{
+  padding:11px 16px;display:flex;justify-content:space-between;
+  align-items:center;border-top:1px solid var(--border);background:var(--card);
+}
+.log-ex-name{font-weight:700;font-size:13px}
+.log-ex-zh{font-size:11px;color:var(--mid);margin-top:1px}
+.sets{display:flex;gap:5px}
+.set{
+  background:var(--gray);border-radius:8px;padding:4px 10px;
+  font-size:11px;font-weight:700;color:#777;
+}
+.set.done{background:var(--black);color:#fff}
+
+/* ADD WORKOUT MODAL */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;
+  display:none;align-items:flex-end;justify-content:center;
+  transition:background .3s;
+}
+.modal-overlay.open{display:flex;animation:fadeOverlay .25s ease both}
+@keyframes fadeOverlay{from{background:rgba(0,0,0,0)}to{background:rgba(0,0,0,.6)}}
+.modal{
+  background:var(--white);border-radius:28px 28px 0 0;
+  padding:24px 24px 40px;width:100%;max-width:480px;
+  animation:modalUp .35s cubic-bezier(.22,.68,0,1.15) both;
+}
+.modal-title{font-family:var(--bebas);font-size:26px;letter-spacing:.06em;margin-bottom:18px}
+.modal-close{float:right;background:var(--gray);border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:16px}
+.form-label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mid);margin-bottom:6px;display:block}
+.form-input{
+  width:100%;background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:12px 14px;font-family:var(--dm);font-size:14px;color:var(--black);
+  outline:none;margin-bottom:14px;transition:border-color .2s;
+}
+.form-input:focus{border-color:var(--red)}
+.form-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.form-submit{
+  width:100%;background:var(--red);color:#fff;border:none;border-radius:14px;
+  padding:15px;font-family:var(--bebas);font-size:18px;letter-spacing:.1em;cursor:pointer;margin-top:6px;
+}
+
+/* ─── INBODY / AI PAGE ─── */
+.ib-hero{
+  margin:16px 20px 0;background:var(--black);border-radius:24px;padding:22px;
+}
+.ib-eyebrow{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#555;margin-bottom:8px}
+.ib-score-row{display:flex;align-items:flex-end;gap:12px}
+.ib-score{font-family:var(--bebas);font-size:72px;color:#fff;letter-spacing:.02em;line-height:1}
+.ib-badge{
+  background:rgba(255,45,45,.2);color:var(--red);
+  font-size:12px;font-weight:700;padding:5px 10px;border-radius:8px;margin-bottom:10px;
+}
+.ib-score-label{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.1em;margin-top:4px}
+.ib-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.ib-box{background:rgba(255,255,255,.06);border-radius:13px;padding:12px 14px}
+.ib-val{font-family:var(--bebas);font-size:24px;color:#fff;letter-spacing:.04em}
+.ib-unit{font-size:11px;color:#555}
+.ib-key{font-size:10px;color:#555;margin-top:2px;text-transform:uppercase;letter-spacing:.08em}
+
+.scan-zone{
+  border:2px dashed var(--border);border-radius:16px;padding:20px;
+  text-align:center;cursor:pointer;transition:all .2s;margin-bottom:0;
+  background:var(--gray);
+}
+.scan-zone:hover{border-color:var(--red);background:#fff5f5}
+.scan-zone:active{transform:scale(.98)}
+.scan-icon{font-size:32px;margin-bottom:8px}
+.scan-title{font-family:var(--bebas);font-size:18px;letter-spacing:.06em;color:var(--black)}
+.scan-sub{font-size:12px;color:var(--mid);margin-top:4px;line-height:1.5}
+.scan-zone.scanning{border-color:var(--red);background:#fff5f5;animation:scanPulse 1s infinite}
+@keyframes scanPulse{0%,100%{border-color:var(--red)}50%{border-color:transparent}}
+.scan-zone.done{border-color:#2ECC71;background:#f0fff8;border-style:solid}
+.scan-divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--mid);font-size:12px;font-weight:600}
+.scan-divider::before,.scan-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.scan-preview{width:100%;border-radius:12px;max-height:160px;object-fit:cover;margin-bottom:12px;display:none}
+  margin:0 20px;background:var(--card);border-radius:18px;
+  border:1px solid var(--border);padding:16px;
+}
+.ib-input-title{font-family:var(--bebas);font-size:16px;letter-spacing:.06em;margin-bottom:14px}
+.ib-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ib-field label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);display:block;margin-bottom:4px}
+.ib-field input{
+  width:100%;background:var(--gray);border:1px solid var(--border);border-radius:10px;
+  padding:10px 12px;font-family:var(--dm);font-size:14px;color:var(--black);
+  outline:none;transition:border-color .2s;
+}
+.ib-field input:focus{border-color:var(--red);background:#fff}
+.ib-goal-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.goal-chip{
+  background:var(--gray);border:1px solid var(--border);border-radius:10px;
+  padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;
+  transition:all .18s;
+}
+.goal-chip.active{background:var(--red);color:#fff;border-color:var(--red);animation:chipPop .3s cubic-bezier(.22,.68,0,1.4) both}
+.analyze-btn{
+  width:100%;background:var(--black);color:#fff;border:none;border-radius:14px;
+  padding:15px;font-family:var(--bebas);font-size:18px;letter-spacing:.1em;
+  cursor:pointer;margin-top:14px;
+  transition:background .2s, transform .15s, box-shadow .2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.analyze-btn:hover{background:#222;transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.2)}
+.analyze-btn:active{transform:scale(.97)}
+.analyze-btn.loading{pointer-events:none;opacity:.7}
+
+/* AI RESULT */
+.ai-result{
+  margin:0 20px;border-radius:20px;border:2px solid var(--red);
+  padding:18px;background:var(--card);display:none;
+}
+.ai-result.show{display:block;animation:stagger .4s cubic-bezier(.22,.68,0,1.15) both}
+.ai-result-head{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.ai-pulse{width:8px;height:8px;background:var(--red);border-radius:50%;animation:blink 1.4s infinite;flex-shrink:0}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+.ai-result-title{font-family:var(--bebas);font-size:17px;letter-spacing:.08em}
+.ai-result-body{font-size:13px;line-height:1.75;color:#333;white-space:pre-wrap}
+.ai-loading{font-size:13px;color:var(--mid);font-style:italic}
+
+/* TIP BOX */
+.tip-box{
+  margin:0 20px;background:#FFF5F5;border-radius:14px;
+  padding:12px 16px;border:1px solid #FFD6D6;
+  font-size:12px;color:#c0392b;line-height:1.6;
+}
+
+/* SETTINGS PAGE */
+.settings-section{margin:0 20px;background:var(--card);border-radius:18px;border:1px solid var(--border);overflow:hidden;margin-bottom:12px}
+.settings-row{
+  padding:14px 16px;display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;
+}
+.settings-row:last-child{border-bottom:none}
+.settings-row:hover{background:var(--gray)}
+.settings-row-label{font-weight:600;font-size:14px}
+.settings-row-sub{font-size:11px;color:var(--mid);margin-top:2px}
+.settings-row-val{font-size:13px;color:var(--mid)}
+.key-input-wrap{margin:0 20px;position:relative}
+.key-input{
+  width:100%;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:14px 50px 14px 16px;font-family:var(--dm);font-size:13px;
+  color:var(--black);outline:none;transition:border-color .2s;
+}
+.key-input:focus{border-color:var(--red)}
+.key-save{
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  background:var(--red);color:#fff;border:none;border-radius:10px;
+  padding:7px 14px;font-family:var(--bebas);font-size:13px;letter-spacing:.06em;cursor:pointer;
+}
+.danger-btn{
+  width:calc(100% - 40px);margin:0 20px;background:none;border:1px solid #FFD6D6;
+  color:#c0392b;border-radius:14px;padding:14px;font-family:var(--dm);
+  font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;
+}
+.danger-btn:hover{background:#FFF5F5}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--black);color:#fff;border-radius:14px;padding:12px 20px;
+  font-size:13px;font-weight:600;z-index:300;opacity:0;
+  transition:opacity .25s, transform .3s cubic-bezier(.22,.68,0,1.2);
+  pointer-events:none;white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- ═══ SETUP SCREEN ═══ -->
+<div id="setup-screen">
+  <div class="setup-logo">DAY <span>1</span></div>
+  <div class="setup-tagline">Every day is Day 1</div>
+  <div class="setup-card">
+    <div class="setup-label">你叫咩名？Your name</div>
+    <input class="setup-input" id="setup-name" type="text" placeholder="Grace" maxlength="20"/>
+    <div class="setup-label" style="margin-top:18px">Anthropic API Key</div>
+    <input class="setup-input" id="setup-key" type="password" placeholder="sk-ant-api03-..."/>
+    <div class="setup-hint">
+      用嚟做AI InBody分析。Key只存係你本地瀏覽器，唔會上傳任何地方。<br>
+      去 <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> 攞你的Key。
+    </div>
+    <button class="setup-btn" onclick="startApp()">開始訓練 LET'S GO →</button>
+    <div class="setup-note">之後可以係設定頁面更改</div>
+  </div>
+</div>
+
+<!-- ═══ MAIN APP ═══ -->
+<div id="app">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div>
+      <div class="logo">DAY <span>1</span></div>
+      <div class="tagline" id="app-tagline">每日都係你的Day 1</div>
+    </div>
+    <div class="topbar-right">
+      <button class="settings-btn" onclick="switchPage('settings')">⚙️</button>
+      <div class="user-avatar" id="user-avatar">G</div>
+    </div>
+  </div>
+
+  <!-- HOME PAGE -->
+  <div class="page active" id="page-home">
+    <div class="hero">
+      <div class="hero-date" id="hero-date"></div>
+      <div class="hero-title" id="hero-title">今日<br><span class="red">課表</span></div>
+      <div class="hero-sub" id="hero-sub">選擇今日訓練部位 ↓</div>
+      <div class="hero-badge" id="hero-badge">DAY 1</div>
+      <div class="hero-stats">
+        <div class="hstat">
+          <div class="hstat-num" id="stat-streak">0</div>
+          <div class="hstat-label" id="label-streak">連勝天數</div>
+        </div>
+        <div class="hstat">
+          <div class="hstat-num" id="stat-sessions">0</div>
+          <div class="hstat-label" id="label-sessions">訓練次數</div>
+        </div>
+        <div class="hstat">
+          <div class="hstat-num" id="stat-week">0</div>
+          <div class="hstat-label" id="label-week">本週</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-label" id="sec-muscles">今日部位</div>
+    <div class="chip-scroll" id="muscle-chips"></div>
+
+    <div class="sec-label" id="sec-quick">快速入口</div>
+    <div class="qgrid">
+      <div class="qcard dark" onclick="switchPage('log')">
+        <div class="qcard-icon">📋</div>
+        <div class="qcard-title" id="qtitle-log">記錄訓練</div>
+        <div class="qcard-sub" id="qsub-log">Log Workout</div>
+      </div>
+      <div class="qcard" onclick="switchPage('equip')">
+        <div class="qcard-icon">🏋️</div>
+        <div class="qcard-title" id="qtitle-equip">器械庫</div>
+        <div class="qcard-sub" id="qsub-equip">Equipment Guide</div>
+      </div>
+      <div class="qcard" onclick="switchPage('ai')">
+        <div class="qcard-icon">🤖</div>
+        <div class="qcard-title" id="qtitle-ai">AI 分析</div>
+        <div class="qcard-sub" id="qsub-ai">InBody + AI</div>
+      </div>
+      <div class="qcard" onclick="startTimer()">
+        <div class="qcard-icon">⏱️</div>
+        <div class="qcard-title" id="qtitle-timer">休息計時</div>
+        <div class="qcard-sub" id="timer-display">Rest Timer</div>
+      </div>
+    </div>
+
+    <div class="sec-label" id="sec-goal">本週目標</div>
+    <div class="goal-card">
+      <div class="goal-row">
+        <div class="goal-name" id="goal-name">設定目標中...</div>
+        <div class="goal-pct" id="goal-pct">0%</div>
+      </div>
+      <div class="bar-track"><div class="bar-fill" id="goal-bar" style="width:0%"></div></div>
+      <div class="goal-note" id="goal-note">去AI分析頁面設定你的目標</div>
+    </div>
+  </div>
+
+  <!-- EQUIPMENT PAGE -->
+  <div class="page" id="page-equip">
+    <div class="search-wrap" style="margin-top:16px">
+      <span style="font-size:16px;opacity:.4">🔍</span>
+      <input type="text" placeholder="搜尋器械 Search equipment..." id="equip-search" oninput="filterEquip()"/>
+    </div>
+    <div class="filter-row" id="filter-row"></div>
+    <div class="equip-list" id="equip-list"></div>
+  </div>
+
+  <!-- LOG PAGE -->
+  <div class="page" id="page-log">
+    <div style="height:16px"></div>
+    <div class="log-toprow">
+      <div class="log-month" id="log-month"></div>
+      <button class="add-btn" onclick="openAddModal()">+ 新增訓練</button>
+    </div>
+    <div id="log-list" style="padding:0;margin-top:12px"></div>
+    <div class="tip-box" id="log-tip" style="display:none"></div>
+  </div>
+
+  <!-- AI / INBODY PAGE -->
+  <div class="page" id="page-ai">
+    <div class="ib-hero">
+      <div class="ib-eyebrow" id="ib-date">InBody Report — 未有記錄</div>
+      <div class="ib-score-row">
+        <div class="ib-score" id="ib-score">--</div>
+        <div class="ib-badge" id="ib-change" style="display:none"></div>
+      </div>
+      <div class="ib-score-label">InBody Score</div>
+      <div class="ib-grid" id="ib-grid">
+        <div class="ib-box"><div class="ib-val">--</div><div class="ib-key">肌肉量 Muscle</div></div>
+        <div class="ib-box"><div class="ib-val">--</div><div class="ib-key">體脂率 Body Fat</div></div>
+        <div class="ib-box"><div class="ib-val">--</div><div class="ib-key">基礎代謝 BMR</div></div>
+        <div class="ib-box"><div class="ib-val">--</div><div class="ib-key">體重 Weight</div></div>
+      </div>
+    </div>
+
+    <div class="sec-label" data-key="secEnter">輸入InBody數據</div>
+    <div class="ib-input-card">
+      <div class="ib-input-title" id="ib-input-title">新增InBody記錄</div>
+
+      <!-- SCAN BUTTON -->
+      <div class="scan-zone" id="scan-zone" onclick="document.getElementById('ib-img-input').click()">
+        <div class="scan-icon">📷</div>
+        <div class="scan-title" id="scan-title">掃描InBody報告</div>
+        <div class="scan-sub" id="scan-sub">上傳相片或截圖，AI自動讀取數據</div>
+        <input type="file" id="ib-img-input" accept="image/*" style="display:none" onchange="scanInBodyImage(event)"/>
+      </div>
+      <div class="scan-divider"><span id="scan-or">或手動輸入</span></div>
+      <img id="scan-preview" class="scan-preview" alt="InBody preview"/>
+      <div class="ib-form-grid">
+        <div class="ib-field">
+          <label>InBody Score</label>
+          <input type="number" id="ib-input-score" placeholder="75.0"/>
+        </div>
+        <div class="ib-field">
+          <label>體重 Weight (kg)</label>
+          <input type="number" id="ib-input-weight" placeholder="68.5"/>
+        </div>
+        <div class="ib-field">
+          <label>肌肉量 Muscle (kg)</label>
+          <input type="number" id="ib-input-muscle" placeholder="58.3"/>
+        </div>
+        <div class="ib-field">
+          <label>體脂率 Body Fat (%)</label>
+          <input type="number" id="ib-input-fat" placeholder="22.1"/>
+        </div>
+        <div class="ib-field">
+          <label>BMR (kcal)</label>
+          <input type="number" id="ib-input-bmr" placeholder="1580"/>
+        </div>
+        <div class="ib-field">
+          <label>身高 Height (cm)</label>
+          <input type="number" id="ib-input-height" placeholder="165"/>
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <label class="form-label">我的目標 My Goal</label>
+        <div class="ib-goal-row" id="goal-chips">
+          <div class="goal-chip active" data-goal="降脂增肌 Fat Loss + Muscle">降脂增肌</div>
+          <div class="goal-chip" data-goal="增肌 Muscle Gain">增肌</div>
+          <div class="goal-chip" data-goal="減脂 Fat Loss">減脂</div>
+          <div class="goal-chip" data-goal="維持體重 Maintenance">維持體重</div>
+        </div>
+      </div>
+      <button class="analyze-btn" onclick="analyzeInBody()">
+        <span>🤖</span>
+        <span>AI 分析 + 生成課表 Analyze & Generate Plan</span>
+      </button>
+    </div>
+
+    <div class="sec-label" data-key="secReco" id="ai-result-label" style="display:none">AI 建議 Recommendations</div>
+    <div class="ai-result" id="ai-result">
+      <div class="ai-result-head">
+        <div class="ai-pulse"></div>
+        <div class="ai-result-title">DAY 1 AI 分析</div>
+      </div>
+      <div class="ai-result-body" id="ai-result-body"></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS PAGE -->
+  <div class="page" id="page-settings">
+    <div style="height:16px"></div>
+    <div class="sec-label" data-key="settingsAccount">帳戶</div>
+    <div class="settings-section">
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label" id="settings-name-display">用戶名</div>
+          <div class="settings-row-sub" id="settings-name-sub">你的名字</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-label" id="sec-lang-label">語言設定</div>
+    <div class="settings-section">
+      <div class="settings-row" onclick="toggleLang()" style="cursor:pointer">
+        <div>
+          <div class="settings-row-label" id="lang-row-title">語言 Language</div>
+          <div class="settings-row-sub" id="lang-row-sub">切換介面語言</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div id="lang-display" style="background:var(--black);color:#fff;font-family:var(--bebas);font-size:15px;letter-spacing:.1em;padding:5px 14px;border-radius:20px">中文</div>
+          <div style="color:var(--mid);font-size:16px">→</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-label">API Key</div>
+    <div class="key-input-wrap">
+      <input class="key-input" type="password" id="key-input" placeholder="sk-ant-api03-..."/>
+      <button class="key-save" onclick="saveKey()" id="key-save-btn">儲存</button>
+    </div>
+    <div style="font-size:11px;color:var(--mid);padding:8px 20px;line-height:1.6" id="key-hint-text">
+      Key只存係本地瀏覽器，安全可靠 🔒
+    </div>
+
+    <div class="sec-label" data-key="settingsData">數據</div>
+    <div class="settings-section">
+      <div class="settings-row" data-label="export" onclick="exportData()">
+        <div>
+          <div class="settings-row-label" id="export-label">匯出訓練記錄</div>
+          <div class="settings-row-sub" id="export-sub">下載 JSON 格式</div>
+        </div>
+        <div class="settings-row-val">→</div>
+      </div>
+    </div>
+
+    <div class="sec-label" style="color:#c0392b" data-key="settingsDanger">危險區域</div>
+    <button class="danger-btn" onclick="clearAllData()" id="clear-btn">清除所有數據</button>
+    <div style="height:20px"></div>
+  </div>
+
+  <!-- NAV BAR -->
+  <div class="nav-bar">
+    <button class="nav-item active" id="nav-home" onclick="switchPage('home')">
+      <div class="nav-icon">🏠</div>
+      <div class="nav-label">Home</div>
+    </button>
+    <button class="nav-item" id="nav-equip" onclick="switchPage('equip')">
+      <div class="nav-icon">🏋️</div>
+      <div class="nav-label">器械</div>
+    </button>
+    <button class="nav-item" id="nav-log" onclick="switchPage('log')">
+      <div class="nav-icon">📋</div>
+      <div class="nav-label">日誌</div>
+    </button>
+    <button class="nav-item" id="nav-ai" onclick="switchPage('ai')">
+      <div class="nav-icon">🤖</div>
+      <div class="nav-label">AI</div>
+    </button>
+  </div>
+</div>
+
+<!-- ADD WORKOUT MODAL -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeAddModal()">✕</button>
+    <div class="modal-title">新增訓練 Add Workout</div>
+
+    <label class="form-label">訓練類型 Type</label>
+    <select class="form-input" id="modal-type">
+      <option>Push Day 胸肩三頭</option>
+      <option>Pull Day 背二頭</option>
+      <option>Leg Day 腿日</option>
+      <option>Full Body 全身</option>
+      <option>Cardio 有氧</option>
+      <option>Core 核心</option>
+    </select>
+
+    <label class="form-label">動作 Exercise</label>
+    <input class="form-input" id="modal-exercise" type="text" placeholder="Bench Press 臥推"/>
+
+    <div class="form-row">
+      <div>
+        <label class="form-label">組數 Sets</label>
+        <input class="form-input" id="modal-sets" type="number" placeholder="4"/>
+      </div>
+      <div>
+        <label class="form-label">次數 Reps</label>
+        <input class="form-input" id="modal-reps" type="number" placeholder="10"/>
+      </div>
+      <div>
+        <label class="form-label">重量 kg</label>
+        <input class="form-input" id="modal-weight" type="number" placeholder="60"/>
+      </div>
+    </div>
+
+    <button class="form-submit" onclick="saveWorkout()">儲存 SAVE</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── DATA ───
+const MUSCLES = [
+  {label:'胸 Chest',en:'Chest'},
+  {label:'背 Back',en:'Back'},
+  {label:'腿 Legs',en:'Legs'},
+  {label:'肩 Shoulder',en:'Shoulder'},
+  {label:'二頭 Biceps',en:'Biceps'},
+  {label:'三頭 Triceps',en:'Triceps'},
+  {label:'核心 Core',en:'Core'},
+  {label:'有氧 Cardio',en:'Cardio'},
+];
+
+const EQUIPMENT = [
+  {n:'Bench Press',zh:'臥推機',e:'🏋️',p:['胸 Chest','三頭 Triceps'],s:['肩 Shoulder'],f:['胸','Chest']},
+  {n:'Incline Press',zh:'上斜臥推',e:'📐',p:['上胸 Upper Chest'],s:['肩前束','三頭'],f:['胸','Chest']},
+  {n:'Cable Fly',zh:'夾胸滑輪',e:'🔄',p:['胸 Chest'],s:['肩前束 Front Delt'],f:['胸','Chest']},
+  {n:'Pec Deck',zh:'蝴蝶機',e:'🦋',p:['胸 Chest'],s:['肩前束'],f:['胸','Chest']},
+  {n:'Lat Pulldown',zh:'滑輪下拉',e:'⬇️',p:['背闊肌 Lats','二頭 Biceps'],s:['菱形肌 Rhomboids'],f:['背','Back']},
+  {n:'Seated Cable Row',zh:'坐姿划船',e:'🚣',p:['中背 Mid Back'],s:['二頭 Biceps','菱形肌'],f:['背','Back']},
+  {n:'Smith Machine Row',zh:'史密斯划船',e:'📏',p:['背闊肌 Lats'],s:['菱形肌','二頭'],f:['背','Back']},
+  {n:'Leg Press',zh:'腿推機',e:'🦵',p:['股四頭 Quads','臀 Glutes'],s:['腿後 Hamstrings'],f:['腿','Legs']},
+  {n:'Smith Machine Squat',zh:'史密斯深蹲',e:'🏗️',p:['股四頭 Quads','臀 Glutes'],s:['核心 Core'],f:['腿','Legs']},
+  {n:'Leg Curl',zh:'腿彎舉機',e:'🦿',p:['腿後 Hamstrings'],s:['臀 Glutes'],f:['腿','Legs']},
+  {n:'Leg Extension',zh:'腿伸展機',e:'🦾',p:['股四頭 Quads'],s:[],f:['腿','Legs']},
+  {n:'Calf Raise',zh:'提踵機',e:'👟',p:['小腿 Calves'],s:[],f:['腿','Legs']},
+  {n:'Shoulder Press Machine',zh:'肩推機',e:'💪',p:['三角肌 Deltoid'],s:['三頭 Triceps'],f:['肩','Shoulder']},
+  {n:'Lateral Raise',zh:'側平舉',e:'↔️',p:['側三角肌 Side Delt'],s:[],f:['肩','Shoulder']},
+  {n:'Rear Delt Fly',zh:'後束飛鳥',e:'🦅',p:['後三角肌 Rear Delt'],s:['菱形肌'],f:['肩','Shoulder']},
+  {n:'Preacher Curl',zh:'牧師椅彎舉',e:'🙏',p:['二頭 Biceps'],s:['前臂 Forearm'],f:['二頭','Biceps']},
+  {n:'Cable Curl',zh:'滑輪彎舉',e:'🔁',p:['二頭 Biceps'],s:[],f:['二頭','Biceps']},
+  {n:'Tricep Pushdown',zh:'三頭下壓',e:'⬇️',p:['三頭 Triceps'],s:[],f:['三頭','Triceps']},
+  {n:'Skull Crusher',zh:'顱骨碎裂',e:'💀',p:['三頭 Triceps'],s:[],f:['三頭','Triceps']},
+  {n:'Cable Crunch',zh:'滑輪捲腹',e:'🌀',p:['腹直肌 Abs'],s:['核心 Core'],f:['核心','Core']},
+  {n:'Plank Machine',zh:'平板支撐',e:'➖',p:['核心 Core'],s:['肩 Shoulder'],f:['核心','Core']},
+  {n:'Treadmill',zh:'跑步機',e:'🏃',p:['全身 Full Body','心肺 Cardio'],s:[],f:['有氧','Cardio']},
+  {n:'Rowing Machine',zh:'划船機',e:'🚤',p:['背 Back','心肺 Cardio'],s:['二頭','核心'],f:['有氧','Cardio']},
+];
+
+// ─── STATE ───
+let apiKey = '', userName = '', selectedMuscles = [], selectedGoal = '降脂增肌 Fat Loss + Muscle';
+let workouts = [], inbodyRecords = [];
+let timerInterval = null, timerSeconds = 0, timerRunning = false;
+let equipFilter = 'ALL';
+let lang = 'zh'; // 'zh' | 'en'
+
+// ─── i18n ───
+const T = {
+  zh: {
+    tagline: '每日都係你的Day 1',
+    heroTitle: '今日<br><span class="red">課表</span>',
+    heroSub: '選擇今日訓練部位 ↓',
+    secMuscles: '今日部位',
+    secQuick: '快速入口',
+    secGoal: '本週目標',
+    secRecent: '近期記錄',
+    qLog: '記錄今日訓練', qEquip: '器械庫', qAI: 'AI 分析', qTimer: '休息計時器',
+    statStreak: '連勝天數', statSessions: '訓練次數', statWeek: '本週',
+    goalDefault: '設定目標中...',
+    goalNoteSetup: '去AI分析頁面設定你的目標',
+    navHome: '首頁', navEquip: '器械', navLog: '日誌', navAI: 'AI',
+    equipSearch: '搜尋器械...',
+    filterAll: '全部',
+    filterLabels: {'ALL':'全部','胸':'胸','背':'背','腿':'腿','肩':'肩','二頭':'二頭','三頭':'三頭','核心':'核心','有氧':'有氧'},
+    logMonth: (m,y) => `${m} ${y}`,
+    addBtn: '+ 新增訓練',
+    logEmpty: '還未有訓練記錄',
+    logEmptySub: '撳上面「+ 新增訓練」開始你的Day 1',
+    logDone: '完成 ✓', logActive: '進行中 ●',
+    logTip: (n) => `你已完成 ${n} 個訓練！保持住，每日都係你的Day 1 💪`,
+    ibNoRecord: 'InBody Report — 未有記錄',
+    ibScore: 'InBody Score',
+    ibMuscle: '肌肉量', ibFat: '體脂率', ibBMR: '基礎代謝', ibWeight: '體重',
+    ibInputTitle: '新增InBody記錄',
+    ibGoals: ['降脂增肌','增肌','減脂','維持體重'],
+    ibGoalValues: ['降脂增肌 Fat Loss + Muscle','增肌 Muscle Gain','減脂 Fat Loss','維持體重 Maintenance'],
+    analyzeBtn: 'AI 分析 + 生成課表',
+    analyzingBtn: '分析緊... Analyzing',
+    aiResultTitle: 'DAY 1 AI 分析',
+    secEnter: '輸入InBody數據',
+    secReco: 'AI 建議',
+    settingsAccount: '帳戶', settingsData: '數據', settingsDanger: '危險區域',
+    settingsExport: '匯出訓練記錄', settingsExportSub: 'Export workout log as JSON',
+    settingsClear: '清除所有數據',
+    keySave: '儲存', keyHint: 'Key只存係本地瀏覽器，安全可靠 🔒',
+    modalTitle: '新增訓練',
+    modalType: '訓練類型', modalEx: '動作', modalSets: '組數', modalReps: '次數', modalKg: '重量',
+    modalSave: '儲存 SAVE',
+    modalExPlaceholder: 'Bench Press 臥推',
+    workoutTypes: ['Push Day 胸肩三頭','Pull Day 背二頭','Leg Day 腿日','Full Body 全身','Cardio 有氧','Core 核心'],
+    toastSaved: '訓練記錄已儲存！💪',
+    toastFillIn: '請填寫動作、組數同次數！',
+    toastFillIb: '請填寫InBody Score、體重、肌肉量同體脂率',
+    toastNoKey: '請先係設定頁面輸入API Key',
+    toastAIDone: 'AI分析完成！💪',
+    toastKeySaved: 'API Key已儲存 🔒',
+    toastExported: '數據已匯出！',
+    toastCleared: '所有數據已清除',
+    toastNoName: '請輸入你的名字！',
+    toastNoKey2: '請輸入有效的API Key',
+    confirmClear: '確定要清除所有訓練記錄？此操作不可復原！',
+    setupName: '你叫咩名？',
+    setupKeyLabel: 'Anthropic API Key',
+    setupHint: 'Key只存係你本地瀏覽器，唔會上傳任何地方。',
+    setupBtn: '開始訓練 LET\'S GO →',
+    setupNote: '之後可以係設定頁面更改',
+    setupNamePH: '你的名字',
+    timer60: '休息1分鐘！準備下一組 💪',
+    timer90: '90秒到！係時候喇！🔥',
+    timer120: '2分鐘休息完！GO GO GO 🚀',
+    goalSessions: (done,total,left) => `${done} of ${total} sessions · ${done>=total ? '🎉 目標達成！' : `還差 ${left} 次`}`,
+    muscleLabels: ['胸','背','腿','肩','二頭','三頭','核心','有氧'],
+    ibLabelFields: ['InBody Score','體重 (kg)','肌肉量 (kg)','體脂率 (%)','BMR (kcal)','身高 (cm)'],
+    myGoalLabel: '我的目標',
+  },
+  en: {
+    tagline: 'Every day is Day 1',
+    heroTitle: 'Today\'s<br><span class="red">Plan</span>',
+    heroSub: 'Select today\'s muscle groups ↓',
+    secMuscles: 'Target Muscles',
+    secQuick: 'Quick Access',
+    secGoal: 'Weekly Goal',
+    secRecent: 'Recent',
+    qLog: 'Log today\'s workout', qEquip: 'Equipment', qAI: 'AI Analysis', qTimer: 'Rest Timer',
+    statStreak: 'Day streak', statSessions: 'Sessions', statWeek: 'This week',
+    goalDefault: 'Set your goal...',
+    goalNoteSetup: 'Go to AI page to set your goal',
+    navHome: 'Home', navEquip: 'Equipment', navLog: 'Log', navAI: 'AI',
+    equipSearch: 'Search equipment...',
+    filterAll: 'All',
+    filterLabels: {'ALL':'All','胸':'Chest','背':'Back','腿':'Legs','肩':'Shoulder','二頭':'Biceps','三頭':'Triceps','核心':'Core','有氧':'Cardio'},
+    logMonth: (m,y) => `${m} ${y}`,
+    addBtn: '+ Add Workout',
+    logEmpty: 'No workouts yet',
+    logEmptySub: 'Tap "Add Workout" to start your Day 1',
+    logDone: 'Done ✓', logActive: 'Active ●',
+    logTip: (n) => `You've completed ${n} workouts! Keep going — every day is Day 1 💪`,
+    ibNoRecord: 'InBody Report — No records yet',
+    ibScore: 'InBody Score',
+    ibMuscle: 'Muscle', ibFat: 'Body Fat', ibBMR: 'BMR', ibWeight: 'Weight',
+    ibInputTitle: 'Add InBody Record',
+    ibGoals: ['Fat Loss + Muscle','Muscle Gain','Fat Loss','Maintenance'],
+    ibGoalValues: ['降脂增肌 Fat Loss + Muscle','增肌 Muscle Gain','減脂 Fat Loss','維持體重 Maintenance'],
+    analyzeBtn: 'AI Analyze + Generate Plan',
+    analyzingBtn: 'Analyzing...',
+    aiResultTitle: 'DAY 1 AI Analysis',
+    secEnter: 'Enter InBody Data',
+    secReco: 'AI Recommendations',
+    settingsAccount: 'Account', settingsData: 'Data', settingsDanger: 'Danger Zone',
+    settingsExport: 'Export Workout Log', settingsExportSub: 'Download as JSON',
+    settingsClear: 'Clear All Data',
+    keySave: 'Save', keyHint: 'Key stored locally in your browser only 🔒',
+    modalTitle: 'Add Workout',
+    modalType: 'Type', modalEx: 'Exercise', modalSets: 'Sets', modalReps: 'Reps', modalKg: 'Weight',
+    modalSave: 'SAVE',
+    modalExPlaceholder: 'Bench Press',
+    workoutTypes: ['Push Day','Pull Day','Leg Day','Full Body','Cardio','Core'],
+    toastSaved: 'Workout saved! 💪',
+    toastFillIn: 'Please fill in exercise, sets and reps!',
+    toastFillIb: 'Please fill in Score, Weight, Muscle and Body Fat',
+    toastNoKey: 'Please add your API Key in Settings first',
+    toastAIDone: 'AI analysis done! 💪',
+    toastKeySaved: 'API Key saved 🔒',
+    toastExported: 'Data exported!',
+    toastCleared: 'All data cleared',
+    toastNoName: 'Please enter your name!',
+    toastNoKey2: 'Please enter a valid API Key',
+    confirmClear: 'Delete all workout records? This cannot be undone!',
+    setupName: 'Your name',
+    setupKeyLabel: 'Anthropic API Key',
+    setupHint: 'Key is stored locally in your browser only — never uploaded anywhere.',
+    setupBtn: 'LET\'S GO →',
+    setupNote: 'You can change this later in Settings',
+    setupNamePH: 'Your name',
+    timer60: '1 minute rest done! Prepare for next set 💪',
+    timer90: '90 seconds! Time to go! 🔥',
+    timer120: '2 minutes up! GO GO GO 🚀',
+    goalSessions: (done,total,left) => `${done} of ${total} sessions · ${done>=total ? '🎉 Goal reached!' : `${left} more to go`}`,
+    muscleLabels: ['Chest','Back','Legs','Shoulder','Biceps','Triceps','Core','Cardio'],
+    ibLabelFields: ['InBody Score','Weight (kg)','Muscle (kg)','Body Fat (%)','BMR (kcal)','Height (cm)'],
+    myGoalLabel: 'My Goal',
+  }
+};
+
+function t(key, ...args) {
+  const val = T[lang][key];
+  return typeof val === 'function' ? val(...args) : val;
+}
+
+function toggleLang() {
+  lang = lang === 'zh' ? 'en' : 'zh';
+  localStorage.setItem('d1_lang', lang);
+  applyLang();
+  showToast(lang === 'zh' ? '已切換至中文 🇭🇰' : 'Switched to English 🇬🇧');
+}
+
+function applyLang() {
+  const s = T[lang];
+  const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+  const setHTML = (id, val) => { const el = document.getElementById(id); if(el) el.innerHTML = val; };
+
+  // topbar
+  set('app-tagline', s.tagline);
+
+  // nav
+  const navLabels = document.querySelectorAll('.nav-label');
+  [s.navHome, s.navEquip, s.navLog, s.navAI].forEach((v,i) => { if(navLabels[i]) navLabels[i].textContent = v; });
+
+  // hero
+  setHTML('hero-title', s.heroTitle);
+  if (!selectedMuscles.length) set('hero-sub', s.heroSub);
+
+  // home sec labels & stat labels
+  set('sec-muscles', s.secMuscles);
+  set('sec-quick', s.secQuick);
+  set('sec-goal', s.secGoal);
+  set('label-streak', s.statStreak);
+  set('label-sessions', s.statSessions);
+  set('label-week', s.statWeek);
+
+  // quick cards — title on top, sub below, no duplication
+  if (lang === 'zh') {
+    set('qtitle-log','記錄訓練'); set('qsub-log','Log Workout');
+    set('qtitle-equip','器械庫'); set('qsub-equip','Equipment Guide');
+    set('qtitle-ai','AI 分析'); set('qsub-ai','InBody + AI');
+    set('qtitle-timer','休息計時'); if(!timerRunning) set('timer-display','Rest Timer');
+  } else {
+    set('qtitle-log','Log Workout'); set('qsub-log','Record today');
+    set('qtitle-equip','Equipment'); set('qsub-equip','Gym machine guide');
+    set('qtitle-ai','AI Analysis'); set('qsub-ai','InBody + AI');
+    set('qtitle-timer','Rest Timer'); if(!timerRunning) set('timer-display','休息計時');
+  }
+
+  // log add btn
+  const addBtn = document.querySelector('.add-btn');
+  if(addBtn) addBtn.textContent = s.addBtn;
+
+  // equip search
+  const esearch = document.getElementById('equip-search');
+  if(esearch) esearch.placeholder = s.equipSearch;
+
+  // modal
+  const modalTitle = document.querySelector('.modal-title');
+  if(modalTitle) modalTitle.textContent = s.modalTitle;
+  const formSubmit = document.querySelector('.form-submit');
+  if(formSubmit) formSubmit.textContent = s.modalSave;
+  const exInput = document.getElementById('modal-exercise');
+  if(exInput) exInput.placeholder = s.modalExPlaceholder;
+  const sel = document.getElementById('modal-type');
+  if(sel) sel.innerHTML = s.workoutTypes.map(w=>`<option>${w}</option>`).join('');
+
+  // AI page
+  set('ib-input-title', s.ibInputTitle);
+  const ibLabels = document.querySelectorAll('.ib-field label');
+  s.ibLabelFields.forEach((l,i) => { if(ibLabels[i]) ibLabels[i].textContent = l; });
+  const gchips = document.querySelectorAll('#goal-chips .goal-chip');
+  s.ibGoals.forEach((l,i) => { if(gchips[i]) gchips[i].textContent = l; });
+  const myGoalEl = document.querySelector('.ib-input-card .form-label');
+  if(myGoalEl) myGoalEl.textContent = s.myGoalLabel;
+  const abtn = document.querySelector('.analyze-btn');
+  if(abtn && !abtn.classList.contains('loading')) abtn.innerHTML = `<span>🤖</span><span>${s.analyzeBtn}</span>`;
+  const aiTitleEl = document.querySelector('.ai-result-title');
+  if(aiTitleEl) aiTitleEl.textContent = s.aiResultTitle;
+
+  // scan zone
+  const scanZone = document.getElementById('scan-zone');
+  if(scanZone && !scanZone.classList.contains('scanning') && !scanZone.classList.contains('done')) {
+    set('scan-title', lang==='zh' ? '掃描InBody報告' : 'Scan InBody Report');
+    set('scan-sub', lang==='zh' ? '上傳相片或截圖，AI自動讀取數據' : 'Upload photo or screenshot — AI reads it automatically');
+  }
+  set('scan-or', lang==='zh' ? '或手動輸入' : 'or enter manually');
+
+  // settings
+  set('settings-name-sub', lang==='zh' ? '你的名字' : 'Your name');
+  set('sec-lang-label', lang==='zh' ? '語言設定' : 'Language');
+  set('lang-row-title', lang==='zh' ? '語言 Language' : 'Language');
+  set('lang-row-sub', lang==='zh' ? '切換介面語言' : 'Switch interface language');
+  set('lang-display', lang==='zh' ? '中文' : 'English');
+  set('key-save-btn', s.keySave);
+  set('key-hint-text', s.keyHint);
+  set('export-label', s.settingsExport);
+  set('export-sub', s.settingsExportSub);
+  set('clear-btn', s.settingsClear);
+
+  // data-key sec labels
+  document.querySelectorAll('[data-key]').forEach(el => {
+    const key = el.getAttribute('data-key');
+    if(s[key]) { el.textContent = s[key]; if(key==='settingsDanger') el.style.color='#c0392b'; }
+  });
+
+  renderHome(); renderEquip(); renderLog(); renderInBody(); setupGoalChips();
+}
+
+// ─── INIT ───
+function init() {
+  apiKey = localStorage.getItem('d1_key') || '';
+  userName = localStorage.getItem('d1_name') || '';
+  workouts = JSON.parse(localStorage.getItem('d1_workouts') || '[]');
+  inbodyRecords = JSON.parse(localStorage.getItem('d1_inbody') || '[]');
+  lang = localStorage.getItem('d1_lang') || 'zh';
+  if (apiKey && userName) { showApp(); }
+}
+
+function startApp() {
+  const name = document.getElementById('setup-name').value.trim();
+  const key = document.getElementById('setup-key').value.trim();
+  if (!name) { showToast(t('toastNoName')); return; }
+  if (!key || !key.startsWith('sk-')) { showToast(t('toastNoKey2')); return; }
+  userName = name;
+  apiKey = key;
+  localStorage.setItem('d1_name', name);
+  localStorage.setItem('d1_key', key);
+  showApp();
+}
+
+function showApp() {
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('user-avatar').textContent = userName.charAt(0).toUpperCase();
+  document.getElementById('settings-name-display').textContent = userName;
+  document.getElementById('key-input').value = apiKey;
+  renderHome(); renderEquip(); renderLog(); renderInBody();
+  setupGoalChips(); applyLang();
+}
+
+// ─── HOME ───
+function renderHome() {
+  const now = new Date();
+  const days = lang === 'zh'
+    ? ['星期日','星期一','星期二','星期三','星期四','星期五','星期六']
+    : ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('hero-date').textContent = `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}`;
+  document.getElementById('log-month').textContent = t('logMonth', months[now.getMonth()], now.getFullYear());
+
+  const thisWeekStart = new Date(); thisWeekStart.setDate(now.getDate() - now.getDay());
+  const weekSessions = workouts.filter(w => new Date(w.date) >= thisWeekStart).length;
+  document.getElementById('stat-sessions').textContent = workouts.length;
+  document.getElementById('stat-week').textContent = weekSessions;
+  document.getElementById('stat-streak').textContent = calcStreak();
+
+  // stat labels
+  const statLabels = document.querySelectorAll('.hstat-label');
+  if(statLabels[0]) statLabels[0].textContent = t('statStreak');
+  if(statLabels[1]) statLabels[1].textContent = t('statSessions');
+  if(statLabels[2]) statLabels[2].textContent = t('statWeek');
+
+  const target = 5;
+  const pct = Math.min(100, Math.round((weekSessions / target) * 100));
+  document.getElementById('goal-pct').textContent = pct + '%';
+  document.getElementById('goal-bar').style.width = pct + '%';
+  document.getElementById('goal-note').textContent = t('goalSessions', weekSessions, target, target - weekSessions);
+
+  const lastIb = inbodyRecords[inbodyRecords.length - 1];
+  document.getElementById('goal-name').textContent = lastIb ? lastIb.goal : t('goalDefault');
+
+  // hero title & sub
+  document.querySelector('.hero-title').innerHTML = t('heroTitle');
+  if (!selectedMuscles.length) document.getElementById('hero-sub').textContent = t('heroSub');
+
+  // section labels — home page has 3
+  const homeSecs = document.querySelectorAll('#page-home .sec-label');
+  if(homeSecs[0]) homeSecs[0].textContent = t('secMuscles');
+  if(homeSecs[1]) homeSecs[1].textContent = t('secQuick');
+  if(homeSecs[2]) homeSecs[2].textContent = t('secGoal');
+
+  // quick card subs
+  const qsubs = document.querySelectorAll('#page-home .qcard-sub');
+  if(qsubs[0]) qsubs[0].textContent = t('qLog');
+  if(qsubs[1]) qsubs[1].textContent = t('qEquip');
+  if(qsubs[2]) qsubs[2].textContent = t('qAI');
+  if(qsubs[3] && !timerRunning) qsubs[3].textContent = t('qTimer');
+
+  // muscle chips
+  const wrap = document.getElementById('muscle-chips');
+  const muscleKeys = ['Chest','Back','Legs','Shoulder','Biceps','Triceps','Core','Cardio'];
+  wrap.innerHTML = muscleKeys.map((en,i) => `
+    <div class="chip ${selectedMuscles.includes(en) ? 'red' : ''}"
+         onclick="toggleMuscle('${en}',this)">${t('muscleLabels')[i]}</div>
+  `).join('');
+}
+
+function toggleMuscle(en, el) {
+  if (selectedMuscles.includes(en)) {
+    selectedMuscles = selectedMuscles.filter(m => m !== en);
+    el.classList.remove('red');
+  } else {
+    selectedMuscles.push(en);
+    el.classList.add('red');
+  }
+  const parts = selectedMuscles.join(' · ');
+  document.getElementById('hero-sub').textContent = parts || t('heroSub');
+  document.getElementById('hero-badge').textContent = parts ? 'ACTIVE' : 'DAY 1';
+}
+
+function calcStreak() {
+  if (!workouts.length) return 0;
+  const dates = [...new Set(workouts.map(w => w.date.split('T')[0]))].sort().reverse();
+  let streak = 0, today = new Date().toISOString().split('T')[0];
+  let cur = new Date(today);
+  for (let d of dates) {
+    if (d === cur.toISOString().split('T')[0]) {
+      streak++;
+      cur.setDate(cur.getDate() - 1);
+    } else break;
+  }
+  return streak;
+}
+
+// ─── TIMER ───
+function startTimer() {
+  if (timerRunning) {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    timerSeconds = 0;
+    document.getElementById('timer-display').textContent = t('qTimer');
+    return;
+  }
+  timerRunning = true;
+  timerSeconds = 0;
+  timerInterval = setInterval(() => {
+    timerSeconds++;
+    const m = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+    const s = (timerSeconds % 60).toString().padStart(2, '0');
+    document.getElementById('timer-display').textContent = `${m}:${s} ⏹`;
+    if (timerSeconds === 60) showToast(t('timer60'));
+    if (timerSeconds === 90) showToast(t('timer90'));
+    if (timerSeconds === 120) showToast(t('timer120'));
+  }, 1000);
+}
+
+// ─── EQUIPMENT ───
+function renderEquip() {
+  const filters = ['ALL','胸','背','腿','肩','二頭','三頭','核心','有氧'];
+  const fl = t('filterLabels');
+  document.getElementById('filter-row').innerHTML = filters.map(f => `
+    <div class="fpill ${equipFilter === f ? 'active' : ''}" onclick="setEquipFilter('${f}')">${fl[f]}</div>
+  `).join('');
+  const esearch = document.getElementById('equip-search');
+  if(esearch) esearch.placeholder = t('equipSearch');
+  filterEquip();
+}
+
+function filterEquip() {
+  const q = (document.getElementById('equip-search')?.value || '').toLowerCase();
+  let data = EQUIPMENT;
+  if (equipFilter !== 'ALL') data = data.filter(e => e.f.includes(equipFilter));
+  if (q) data = data.filter(e => e.n.toLowerCase().includes(q) || e.zh.includes(q));
+  const isEn = lang === 'en';
+  document.getElementById('equip-list').innerHTML = data.length ? data.map(e => `
+    <div class="ecard">
+      <div class="ecard-icon">${e.e}</div>
+      <div class="ecard-info">
+        <div class="ecard-name">${isEn ? e.n : e.zh}</div>
+        <div class="ecard-zh">${isEn ? e.zh : e.n}</div>
+        <div class="tags">
+          ${e.p.map(m => `<span class="tag p">${m}</span>`).join('')}
+          ${e.s.map(m => `<span class="tag s">${m}</span>`).join('')}
+        </div>
+      </div>
+    </div>`).join('') :
+    `<div style="text-align:center;padding:40px;color:var(--mid);font-size:14px">${isEn ? 'No results 😅' : '找不到器械 No results 😅'}</div>`;
+}
+
+function renderLog() {
+  const now = new Date();
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('log-month').textContent = t('logMonth', months[now.getMonth()], now.getFullYear());
+  const addBtn = document.querySelector('.add-btn');
+  if(addBtn) addBtn.textContent = t('addBtn');
+  const list = document.getElementById('log-list');
+  if (!workouts.length) {
+    list.innerHTML = `<div style="text-align:center;padding:48px 20px;color:var(--mid)"><div style="font-size:40px;margin-bottom:12px">📋</div><div style="font-weight:700;font-size:15px;margin-bottom:6px">${t('logEmpty')}</div><div style="font-size:13px">${t('logEmptySub')}</div></div>`;
+    return;
+  }
+  const groups = {};
+  workouts.slice().reverse().forEach(w => {
+    const key = w.type + '|' + w.date.split('T')[0];
+    if (!groups[key]) groups[key] = { type: w.type, date: w.date, exercises: [] };
+    groups[key].exercises.push(w);
+  });
+  list.innerHTML = Object.values(groups).map(g => {
+    const d = new Date(g.date);
+    const dateStr = `${d.getMonth()+1}/${d.getDate()} · ${g.exercises.length} ${lang==='en'?'exercises':'個動作'}`;
+    return `
+    <div class="log-block">
+      <div class="lblock-head">
+        <div>
+          <div class="lblock-title">${g.type.toUpperCase()}</div>
+          <div class="lblock-meta">${dateStr}</div>
+        </div>
+        <div class="lblock-done">${t('logDone')}</div>
+      </div>
+      ${g.exercises.map(e => `
+        <div class="log-ex">
+          <div><div class="log-ex-name">${e.exercise}</div></div>
+          <div class="sets">
+            <div class="set done">${e.sets}×${e.reps}</div>
+            ${e.weight ? `<div class="set done">${e.weight}kg</div>` : ''}
+          </div>
+        </div>`).join('')}
+    </div>`;
+  }).join('');
+  if (workouts.length >= 3) {
+    const tip = document.getElementById('log-tip');
+    tip.style.display = 'block';
+    tip.innerHTML = `<strong>DAY 1 Tip:</strong> ${t('logTip', workouts.length)}`;
+  }
+}
+
+function renderInBody() {
+  const last = inbodyRecords[inbodyRecords.length - 1];
+  const ibNoRec = document.getElementById('ib-date');
+  if (!last) { if(ibNoRec) ibNoRec.textContent = t('ibNoRecord'); return; }
+  const prev = inbodyRecords[inbodyRecords.length - 2];
+  ibNoRec.textContent = `InBody Report · ${new Date(last.date).toLocaleDateString(lang==='zh'?'zh-TW':'en-US')}`;
+  document.getElementById('ib-score').textContent = last.score || '--';
+  if (prev && last.score && prev.score) {
+    const diff = (parseFloat(last.score) - parseFloat(prev.score)).toFixed(1);
+    const badge = document.getElementById('ib-change');
+    badge.style.display = 'block';
+    badge.textContent = (diff > 0 ? '↑ +' : '↓ ') + diff;
+  }
+  const s = T[lang];
+  document.getElementById('ib-grid').innerHTML = `
+    <div class="ib-box"><div class="ib-val">${last.muscle||'--'}<span class="ib-unit">kg</span></div><div class="ib-key">${s.ibMuscle}</div></div>
+    <div class="ib-box"><div class="ib-val">${last.fat||'--'}<span class="ib-unit">%</span></div><div class="ib-key">${s.ibFat}</div></div>
+    <div class="ib-box"><div class="ib-val">${last.bmr||'--'}<span class="ib-unit">kcal</span></div><div class="ib-key">${s.ibBMR}</div></div>
+    <div class="ib-box"><div class="ib-val">${last.weight||'--'}<span class="ib-unit">kg</span></div><div class="ib-key">${s.ibWeight}</div></div>
+  `;
+}
+
+// ─── INBODY IMAGE SCAN ───
+async function scanInBodyImage(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (!apiKey) { showToast(t('toastNoKey')); return; }
+
+  // show preview
+  const preview = document.getElementById('scan-preview');
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const base64 = e.target.result;
+    preview.src = base64;
+    preview.style.display = 'block';
+
+    const zone = document.getElementById('scan-zone');
+    zone.classList.add('scanning');
+    document.getElementById('scan-title').textContent = lang === 'zh' ? '🤖 AI讀取緊數據...' : '🤖 AI reading data...';
+    document.getElementById('scan-sub').textContent = lang === 'zh' ? '請稍等，自動填入所有欄位' : 'Please wait, auto-filling all fields';
+
+    const imgData = base64.split(',')[1];
+    const mediaType = file.type || 'image/jpeg';
+
+    const prompt = lang === 'zh'
+      ? `請仔細分析這張InBody體成分報告圖片，提取以下數據並只以JSON格式回覆，不要有其他文字：
+{"score": "InBody分數", "weight": "體重kg", "muscle": "骨骼肌肉量kg", "fat": "體脂率%", "bmr": "基礎代謝率kcal", "height": "身高cm（如有）"}
+如果某個數值找不到，填null。只回覆JSON，不要任何說明文字。`
+      : `Carefully analyze this InBody body composition report image and extract the following data. Reply ONLY with JSON, no other text:
+{"score": "InBody score number", "weight": "weight in kg", "muscle": "skeletal muscle mass in kg", "fat": "body fat percentage", "bmr": "basal metabolic rate kcal", "height": "height in cm if available"}
+If a value cannot be found, use null. Reply ONLY with JSON, no explanations.`;
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 300,
+          messages: [{
+            role: 'user',
+            content: [
+              { type: 'image', source: { type: 'base64', media_type: mediaType, data: imgData } },
+              { type: 'text', text: prompt }
+            ]
+          }]
+        })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+
+      const raw = data.content[0].text.trim();
+      const jsonStr = raw.replace(/```json|```/g, '').trim();
+      const extracted = JSON.parse(jsonStr);
+
+      // auto-fill fields
+      if (extracted.score) document.getElementById('ib-input-score').value = extracted.score;
+      if (extracted.weight) document.getElementById('ib-input-weight').value = extracted.weight;
+      if (extracted.muscle) document.getElementById('ib-input-muscle').value = extracted.muscle;
+      if (extracted.fat) document.getElementById('ib-input-fat').value = extracted.fat;
+      if (extracted.bmr) document.getElementById('ib-input-bmr').value = extracted.bmr;
+      if (extracted.height) document.getElementById('ib-input-height').value = extracted.height;
+
+      zone.classList.remove('scanning');
+      zone.classList.add('done');
+      document.getElementById('scan-title').textContent = lang === 'zh' ? '✅ 數據讀取成功！' : '✅ Data extracted!';
+      document.getElementById('scan-sub').textContent = lang === 'zh' ? '已自動填入所有欄位，請確認後分析' : 'All fields auto-filled. Please verify then analyze.';
+      showToast(lang === 'zh' ? '📊 InBody數據已自動填入！' : '📊 InBody data auto-filled!');
+
+    } catch (err) {
+      zone.classList.remove('scanning');
+      document.getElementById('scan-title').textContent = lang === 'zh' ? '📷 掃描InBody報告' : '📷 Scan InBody Report';
+      document.getElementById('scan-sub').textContent = lang === 'zh' ? '讀取失敗，請手動輸入' : 'Scan failed, please enter manually';
+      showToast(lang === 'zh' ? '讀取失敗，請手動輸入數據' : 'Scan failed, please enter manually');
+    }
+  };
+  reader.readAsDataURL(file);
+}
+  // update chip labels to current lang
+  const gchips = document.querySelectorAll('#goal-chips .goal-chip');
+  T[lang].ibGoals.forEach((l,i) => { if(gchips[i]) gchips[i].textContent = l; });
+  gchips.forEach(chip => {
+    chip.addEventListener('click', function() {
+      document.querySelectorAll('#goal-chips .goal-chip').forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+      selectedGoal = this.dataset.goal;
+    });
+  });
+}
+
+// ─── LOG MODAL ───
+function openAddModal() {
+  const s = T[lang];
+  document.querySelector('.modal-title').textContent = s.modalTitle;
+  document.querySelector('.form-submit').textContent = s.modalSave;
+  document.getElementById('modal-exercise').placeholder = s.modalExPlaceholder;
+  const sel = document.getElementById('modal-type');
+  sel.innerHTML = s.workoutTypes.map(w => `<option>${w}</option>`).join('');
+  const fls = document.querySelectorAll('#add-modal .form-label');
+  const lblKeys = ['modalType','modalEx','modalSets','modalReps','modalKg'];
+  fls.forEach((el,i) => { if(lblKeys[i]) el.textContent = s[lblKeys[i]]; });
+  document.getElementById('add-modal').classList.add('open');
+}
+function closeAddModal() { document.getElementById('add-modal').classList.remove('open'); }
+function saveWorkout() {
+  const type = document.getElementById('modal-type').value;
+  const exercise = document.getElementById('modal-exercise').value.trim();
+  const sets = document.getElementById('modal-sets').value;
+  const reps = document.getElementById('modal-reps').value;
+  const weight = document.getElementById('modal-weight').value;
+  if (!exercise || !sets || !reps) { showToast(t('toastFillIn')); return; }
+  workouts.push({ type, exercise, sets, reps, weight, date: new Date().toISOString() });
+  localStorage.setItem('d1_workouts', JSON.stringify(workouts));
+  closeAddModal();
+  renderLog(); renderHome();
+  showToast(t('toastSaved'));
+  ['modal-exercise','modal-sets','modal-reps','modal-weight'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+}
+
+async function analyzeInBody() {
+  const score = document.getElementById('ib-input-score').value;
+  const weight = document.getElementById('ib-input-weight').value;
+  const muscle = document.getElementById('ib-input-muscle').value;
+  const fat = document.getElementById('ib-input-fat').value;
+  const bmr = document.getElementById('ib-input-bmr').value;
+  const height = document.getElementById('ib-input-height').value;
+
+  if (!score || !weight || !muscle || !fat) {
+    showToast(t('toastFillIb'));
+    return;
+  }
+  if (!apiKey) { showToast(t('toastNoKey')); return; }
+
+  // save record
+  const record = { score, weight, muscle, fat, bmr, height, goal: selectedGoal, date: new Date().toISOString() };
+  inbodyRecords.push(record);
+  localStorage.setItem('d1_inbody', JSON.stringify(inbodyRecords));
+  renderInBody();
+
+  // show AI panel
+  const resultDiv = document.getElementById('ai-result');
+  const bodyDiv = document.getElementById('ai-result-body');
+  const labelDiv = document.getElementById('ai-result-label');
+  resultDiv.classList.add('show');
+  labelDiv.style.display = 'block';
+  bodyDiv.innerHTML = '<span class="ai-loading">🤖 AI分析緊你的數據，請稍等...</span>';
+
+  const prompt = `你係一個專業健身教練同營養師。請用繁體中文同英文（雙語）分析以下InBody數據，並提供詳細訓練建議。
+
+用戶InBody數據：
+- InBody Score: ${score}
+- 體重 Weight: ${weight}kg
+- 肌肉量 Muscle Mass: ${muscle}kg
+- 體脂率 Body Fat: ${fat}%
+- 基礎代謝率 BMR: ${bmr || '未提供'}kcal
+- 身高 Height: ${height || '未提供'}cm
+- 目標 Goal: ${selectedGoal}
+
+請提供：
+1. 📊 數據解讀 Data Analysis（係唔係健康範圍？）
+2. 🎯 訓練建議 Training Recommendations（每週幾次？咩split？）
+3. 🏋️ 重點訓練部位 Priority Muscle Groups
+4. 🥗 營養建議 Nutrition Tips（蛋白質目標、熱量建議）
+5. 📅 8週訓練計劃概覽 8-Week Plan Overview
+
+請用清晰易讀嘅格式，emoji輔助，中英雙語。`;
+
+  const btn = document.querySelector('.analyze-btn');
+  btn.classList.add('loading');
+  btn.innerHTML = `<span style="display:inline-block;width:18px;height:18px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite"></span><span>${t('analyzingBtn')}</span>`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1500,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    if (data.error) {
+      bodyDiv.innerHTML = `<span style="color:var(--red)">錯誤：${data.error.message}</span>`;
+      return;
+    }
+    bodyDiv.textContent = data.content[0].text;
+    showToast(t('toastAIDone'));
+  } catch (e) {
+    bodyDiv.innerHTML = `<span style="color:var(--red)">${lang==='zh'?'連接失敗，請檢查API Key同網絡連接。':'Connection failed. Please check your API Key and network.'}</span>`;
+  } finally {
+    btn.classList.remove('loading');
+    btn.innerHTML = `<span>🤖</span><span>${t('analyzeBtn')}</span>`;
+  }
+}
+
+function saveKey() {
+  const k = document.getElementById('key-input').value.trim();
+  if (!k) { showToast(t('toastNoKey2')); return; }
+  apiKey = k;
+  localStorage.setItem('d1_key', k);
+  showToast(t('toastKeySaved'));
+}
+
+function exportData() {
+  const data = { workouts, inbodyRecords, exportDate: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'day1_export.json';
+  a.click();
+  showToast(t('toastExported'));
+}
+
+function clearAllData() {
+  if (!confirm(t('confirmClear'))) return;
+  workouts = []; inbodyRecords = [];
+  localStorage.removeItem('d1_workouts');
+  localStorage.removeItem('d1_inbody');
+  renderHome(); renderLog(); renderInBody();
+  showToast(t('toastCleared'));
+}
+
+// ─── NAV ───
+const PAGE_ORDER = ['home','equip','log','ai','settings'];
+let currentPage = 'home';
+
+function switchPage(id) {
+  const oldIdx = PAGE_ORDER.indexOf(currentPage);
+  const newIdx = PAGE_ORDER.indexOf(id);
+  const dir = newIdx >= oldIdx ? 'slide-left' : 'slide-right';
+
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active','slide-left','slide-right'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  const newPage = document.getElementById('page-' + id);
+  newPage.classList.add('active', dir);
+  setTimeout(() => newPage.classList.remove('slide-left','slide-right'), 350);
+
+  const navEl = document.getElementById('nav-' + id);
+  if (navEl) navEl.classList.add('active');
+
+  currentPage = id;
+  if (id === 'home') renderHome();
+  if (id === 'log') renderLog();
+
+  // stagger children on page enter
+  const cards = newPage.querySelectorAll('.ecard, .log-block, .qcard, .ib-box, .settings-section');
+  cards.forEach((c, i) => {
+    c.style.animation = 'none';
+    c.style.opacity = '0';
+    setTimeout(() => {
+      c.style.animation = `stagger .35s cubic-bezier(.22,.68,0,1.15) ${i * 60}ms both`;
+    }, 10);
+  });
+}
+
+// ─── TOAST ───
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+init();
+</script>
+</body>
+</html>
