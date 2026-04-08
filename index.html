@@ -725,6 +725,34 @@ body{font-family:var(--dm);background:var(--white);color:var(--black);min-height
 <div class="toast" id="toast"></div>
 
 <script>
+// ─── GEMINI API HELPER ───
+const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-lite'];
+
+async function callGemini(apiKey, contents, maxTokens) {
+  let lastErr = null;
+  for (const model of GEMINI_MODELS) {
+    try {
+      console.log('[GEMINI] Trying model:', model);
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents, generationConfig: { maxOutputTokens: maxTokens || 500 } })
+      });
+      const data = await res.json();
+      if (data.candidates && data.candidates[0]) {
+        console.log('[GEMINI] Success with model:', model);
+        return data;
+      }
+      lastErr = data.error?.message || 'Unknown error';
+      console.warn('[GEMINI]', model, 'failed:', lastErr);
+    } catch (e) {
+      lastErr = e.message;
+      console.warn('[GEMINI]', model, 'error:', e.message);
+    }
+  }
+  throw new Error(lastErr || 'All models failed');
+}
+
 // ─── DATA ───
 const MUSCLES = [
   {label:'胸 Chest',en:'Chest'},
@@ -1287,27 +1315,15 @@ async function scanInBodyImage(event) {
 If a value cannot be found, use null. Reply ONLY with JSON, no explanations.`;
 
     try {
-      const payload = {
-        contents: [{
-          parts: [
-            { inlineData: { mimeType: mediaType, data: imgData } },
-            { text: prompt }
-          ]
-        }],
-        generationConfig: { maxOutputTokens: 500 }
-      };
+      const contents = [{
+        parts: [
+          { inlineData: { mimeType: mediaType, data: imgData } },
+          { text: prompt }
+        ]
+      }];
       console.log('[SCAN] Sending image to Gemini API, size:', Math.round(imgData.length / 1024), 'KB');
 
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      console.log('[SCAN] API response status:', res.status, JSON.stringify(data).substring(0, 300));
-
-      if (data.error) throw new Error(data.error.message);
-      if (!data.candidates || !data.candidates[0]) throw new Error('No candidates in response');
+      const data = await callGemini(apiKey, contents, 500);
 
       const raw = data.candidates[0].content.parts[0].text.trim();
       console.log('[SCAN] Raw AI text:', raw);
@@ -1436,23 +1452,8 @@ async function analyzeInBody() {
   btn.innerHTML = `<span style="display:inline-block;width:18px;height:18px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite"></span><span>${t('analyzingBtn')}</span>`;
 
   try {
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{ text: prompt }]
-        }],
-        generationConfig: { maxOutputTokens: 1500 }
-      })
-    });
-    const data = await res.json();
-    if (data.error) {
-      bodyDiv.innerHTML = `<span style="color:var(--red)">錯誤：${data.error.message}</span>`;
-      return;
-    }
+    const contents = [{ parts: [{ text: prompt }] }];
+    const data = await callGemini(apiKey, contents, 1500);
     bodyDiv.textContent = data.candidates[0].content.parts[0].text;
     showToast(t('toastAIDone'));
   } catch (e) {
