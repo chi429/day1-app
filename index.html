@@ -731,23 +731,35 @@ const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash
 async function callGemini(apiKey, contents, maxTokens) {
   let lastErr = null;
   for (const model of GEMINI_MODELS) {
-    try {
-      console.log('[GEMINI] Trying model:', model);
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents, generationConfig: { maxOutputTokens: maxTokens || 500 } })
-      });
-      const data = await res.json();
-      if (data.candidates && data.candidates[0]) {
-        console.log('[GEMINI] Success with model:', model);
-        return data;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        console.log('[GEMINI] Trying model:', model, attempt > 0 ? '(retry)' : '');
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents, generationConfig: { maxOutputTokens: maxTokens || 500 } })
+        });
+        const data = await res.json();
+        if (data.candidates && data.candidates[0]) {
+          console.log('[GEMINI] Success with model:', model);
+          return data;
+        }
+        lastErr = data.error?.message || 'Unknown error';
+        console.warn('[GEMINI]', model, 'failed:', lastErr);
+        // If rate limited (429) or overloaded (503), wait and retry once
+        if ((res.status === 429 || res.status === 503) && attempt === 0) {
+          const wait = data.error?.message?.match(/retry in ([\d.]+)s/)?.[1];
+          const delay = wait ? Math.ceil(parseFloat(wait)) * 1000 : 10000;
+          console.log('[GEMINI] Rate limited, waiting', delay/1000, 'seconds...');
+          await new Promise(r => setTimeout(r, delay));
+          continue;
+        }
+        break; // non-retryable error, try next model
+      } catch (e) {
+        lastErr = e.message;
+        console.warn('[GEMINI]', model, 'error:', e.message);
+        break;
       }
-      lastErr = data.error?.message || 'Unknown error';
-      console.warn('[GEMINI]', model, 'failed:', lastErr);
-    } catch (e) {
-      lastErr = e.message;
-      console.warn('[GEMINI]', model, 'error:', e.message);
     }
   }
   throw new Error(lastErr || 'All models failed');
