@@ -1332,6 +1332,8 @@ If a value cannot be found, use null. Reply ONLY with JSON, no explanations.`;
   };
   reader.readAsDataURL(file);
 }
+
+function setupGoalChips() {
   // update chip labels to current lang
   const gchips = document.querySelectorAll('#goal-chips .goal-chip');
   T[lang].ibGoals.forEach((l,i) => { if(gchips[i]) gchips[i].textContent = l; });
