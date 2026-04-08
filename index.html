@@ -1287,26 +1287,31 @@ async function scanInBodyImage(event) {
 If a value cannot be found, use null. Reply ONLY with JSON, no explanations.`;
 
     try {
+      const payload = {
+        contents: [{
+          parts: [
+            { inlineData: { mimeType: mediaType, data: imgData } },
+            { text: prompt }
+          ]
+        }],
+        generationConfig: { maxOutputTokens: 500 }
+      };
+      console.log('[SCAN] Sending image to Gemini API, size:', Math.round(imgData.length / 1024), 'KB');
+
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [
-              { inline_data: { mime_type: mediaType, data: imgData } },
-              { text: prompt }
-            ]
-          }],
-          generationConfig: { maxOutputTokens: 300 }
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
+      console.log('[SCAN] API response status:', res.status, JSON.stringify(data).substring(0, 300));
+
       if (data.error) throw new Error(data.error.message);
+      if (!data.candidates || !data.candidates[0]) throw new Error('No candidates in response');
 
       const raw = data.candidates[0].content.parts[0].text.trim();
-      const jsonStr = raw.replace(/```json|```/g, '').trim();
+      console.log('[SCAN] Raw AI text:', raw);
+      const jsonStr = raw.replace(/```json\n?|```/g, '').trim();
       const extracted = JSON.parse(jsonStr);
 
       // auto-fill fields
@@ -1324,10 +1329,11 @@ If a value cannot be found, use null. Reply ONLY with JSON, no explanations.`;
       showToast(lang === 'zh' ? '📊 InBody數據已自動填入！' : '📊 InBody data auto-filled!');
 
     } catch (err) {
+      console.error('[SCAN] Error:', err.message, err);
       zone.classList.remove('scanning');
       document.getElementById('scan-title').textContent = lang === 'zh' ? '📷 掃描InBody報告' : '📷 Scan InBody Report';
-      document.getElementById('scan-sub').textContent = lang === 'zh' ? '讀取失敗，請手動輸入' : 'Scan failed, please enter manually';
-      showToast(lang === 'zh' ? '讀取失敗，請手動輸入數據' : 'Scan failed, please enter manually');
+      document.getElementById('scan-sub').textContent = err.message || (lang === 'zh' ? '讀取失敗，請手動輸入' : 'Scan failed, please enter manually');
+      showToast(lang === 'zh' ? '讀取失敗：' + err.message : 'Scan failed: ' + err.message);
     }
   };
   reader.readAsDataURL(file);
