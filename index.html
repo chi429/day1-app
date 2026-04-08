@@ -1031,7 +1031,7 @@ function startApp() {
   const name = document.getElementById('setup-name').value.trim();
   const key = document.getElementById('setup-key').value.trim();
   if (!name) { showToast(t('toastNoName')); return; }
-  if (!key || !key.startsWith('sk-')) { showToast(t('toastNoKey2')); return; }
+  if (!key || !key.startsWith('AIza')) { showToast(t('toastNoKey2')); return; }
   userName = name;
   apiKey = key;
   localStorage.setItem('d1_name', name);
