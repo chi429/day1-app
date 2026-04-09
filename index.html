@@ -1459,7 +1459,10 @@ async function scanInBodyImage(event) {
     document.getElementById('scan-sub').textContent = lang === 'zh' ? '請稍等，自動填入所有欄位' : 'Please wait, auto-filling all fields';
 
     const imgData = base64.split(',')[1];
-    const mediaType = file.type || 'image/jpeg';
+    // Map HEIC/HEIF to supported mime type; fallback to jpeg
+    let mediaType = file.type || 'image/jpeg';
+    if (mediaType === 'image/heic' || mediaType === 'image/heif') mediaType = 'image/jpeg';
+    if (!mediaType.startsWith('image/')) mediaType = 'image/jpeg';
 
     const prompt = lang === 'zh'
       ? `請仔細分析這張InBody體成分報告圖片，提取以下數據並只以JSON格式回覆，不要有其他文字：
@@ -1478,11 +1481,16 @@ If a value cannot be found, use null. Reply ONLY with JSON, no explanations.`;
       }];
       console.log('[SCAN] Sending image to Gemini API, size:', Math.round(imgData.length / 1024), 'KB');
 
-      const data = await callGemini(apiKey, contents, 500);
+      const data = await callGemini(apiKey, contents, 1000);
 
       const raw = data.candidates[0].content.parts[0].text.trim();
       console.log('[SCAN] Raw AI text:', raw);
-      const jsonStr = raw.replace(/```json\n?|```/g, '').trim();
+      let jsonStr = raw.replace(/```json\n?|```/g, '').trim();
+      // Fix truncated JSON: if it doesn't end with }, try to close it
+      if (!jsonStr.endsWith('}')) {
+        const lastComplete = jsonStr.lastIndexOf(',');
+        if (lastComplete > 0) jsonStr = jsonStr.substring(0, lastComplete) + '}';
+      }
       const extracted = JSON.parse(jsonStr);
 
       // auto-fill fields
