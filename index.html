@@ -341,6 +341,51 @@ body{font-family:var(--dm);background:var(--white);color:var(--black);min-height
   transition:all .18s;
 }
 .goal-chip.active{background:var(--red);color:#fff;border-color:var(--red);animation:chipPop .3s cubic-bezier(.22,.68,0,1.4) both}
+
+/* ─── INBODY ADVANCED / HISTORY / DELTA ─── */
+.ib-advanced-toggle{
+  width:100%;background:var(--gray);border:1px solid var(--border);border-radius:10px;
+  padding:10px 14px;font-family:var(--dm);font-size:12px;font-weight:600;color:var(--mid);
+  cursor:pointer;margin-top:12px;margin-bottom:4px;text-align:center;
+  transition:all .2s;
+}
+.ib-advanced-toggle:hover{background:#e0ddd8;border-color:#ccc}
+.ib-advanced-fields{display:none;margin-top:8px}
+.ib-advanced-fields.open{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ib-form-separator{
+  grid-column:1/-1;height:1px;background:var(--border);margin:4px 0;
+}
+.ib-grid-secondary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px}
+.ib-box-sm{background:rgba(255,255,255,.06);border-radius:10px;padding:8px 10px}
+.ib-box-sm .ib-val{font-family:var(--bebas);font-size:18px;color:#fff;letter-spacing:.04em}
+.ib-box-sm .ib-unit{font-size:10px;color:#555}
+.ib-box-sm .ib-key{font-size:9px;color:#555;margin-top:1px;text-transform:uppercase;letter-spacing:.06em}
+.ib-delta{font-size:10px;font-weight:700;margin-left:4px}
+.ib-delta.good{color:#2ECC71}
+.ib-delta.bad{color:#FF2D2D}
+.ib-delta.neutral{color:#888}
+.ib-history-wrap{padding:0 20px;display:none}
+.ib-history-wrap.show{display:block}
+.ib-record-card{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 14px;margin-bottom:8px;
+  transition:transform .15s;
+}
+.ib-record-card:active{transform:scale(.98)}
+.ib-record-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.ib-record-card-date{font-size:12px;font-weight:600;color:var(--black)}
+.ib-record-card-score{font-family:var(--bebas);font-size:20px;color:var(--red);letter-spacing:.04em}
+.ib-record-chips{display:flex;flex-wrap:wrap;gap:4px}
+.ib-record-chip{
+  background:var(--gray);border-radius:6px;padding:3px 8px;
+  font-size:10px;font-weight:600;color:var(--black);
+  display:flex;align-items:center;gap:2px;
+}
+.ib-history-empty{font-size:12px;color:var(--mid);text-align:center;padding:20px 0}
+@media(max-width:360px){
+  .ib-grid-secondary{grid-template-columns:1fr 1fr}
+}
+
 .analyze-btn{
   width:100%;background:var(--black);color:#fff;border:none;border-radius:14px;
   padding:15px;font-family:var(--bebas);font-size:18px;letter-spacing:.1em;
@@ -585,6 +630,41 @@ body{font-family:var(--dm);background:var(--white);color:var(--black);min-height
           <input type="number" id="ib-input-height" placeholder="165"/>
         </div>
       </div>
+      <button type="button" class="ib-advanced-toggle" id="ib-advanced-toggle" onclick="toggleAdvancedFields()">顯示進階數據 ▼</button>
+      <div class="ib-advanced-fields" id="ib-advanced-fields">
+        <div class="ib-field">
+          <label>體水分 TBW (L)</label>
+          <input type="number" step="any" id="ib-input-tbw" placeholder="35.2"/>
+        </div>
+        <div class="ib-field">
+          <label>蛋白質 Protein (kg)</label>
+          <input type="number" step="any" id="ib-input-protein" placeholder="10.5"/>
+        </div>
+        <div class="ib-field">
+          <label>礦物質 Minerals (kg)</label>
+          <input type="number" step="any" id="ib-input-minerals" placeholder="3.8"/>
+        </div>
+        <div class="ib-field">
+          <label>體脂肪量 Fat Mass (kg)</label>
+          <input type="number" step="any" id="ib-input-fatmass" placeholder="15.2"/>
+        </div>
+        <div class="ib-field">
+          <label>除脂體重 FFM (kg)</label>
+          <input type="number" step="any" id="ib-input-ffm" placeholder="53.3"/>
+        </div>
+        <div class="ib-field">
+          <label>內臟脂肪 Visceral Fat</label>
+          <input type="number" step="any" id="ib-input-visceral" placeholder="8"/>
+        </div>
+        <div class="ib-field">
+          <label>腰臀比 WHR</label>
+          <input type="number" step="any" id="ib-input-whr" placeholder="0.85"/>
+        </div>
+        <div class="ib-field">
+          <label>ECW Ratio</label>
+          <input type="number" step="any" id="ib-input-ecw" placeholder="0.38"/>
+        </div>
+      </div>
       <div style="margin-top:14px">
         <label class="form-label">我的目標 My Goal</label>
         <div class="ib-goal-row" id="goal-chips">
@@ -599,6 +679,9 @@ body{font-family:var(--dm);background:var(--white);color:var(--black);min-height
         <span>AI 分析 + 生成課表 Analyze & Generate Plan</span>
       </button>
     </div>
+
+    <div class="sec-label" id="ib-history-label" style="display:none">歷史記錄 History</div>
+    <div id="ib-history" class="ib-history-wrap"></div>
 
     <div class="sec-label" data-key="secReco" id="ai-result-label" style="display:none">AI 建議 Recommendations</div>
     <div class="ai-result" id="ai-result">
@@ -877,6 +960,14 @@ const T = {
     goalSessions: (done,total,left) => `${done} of ${total} sessions · ${done>=total ? '🎉 目標達成！' : `還差 ${left} 次`}`,
     muscleLabels: ['胸','背','腿','肩','二頭','三頭','核心','有氧'],
     ibLabelFields: ['InBody Score','體重 (kg)','肌肉量 (kg)','體脂率 (%)','BMR (kcal)','身高 (cm)'],
+    ibAdvancedLabels: ['體水分 TBW (L)','蛋白質 Protein (kg)','礦物質 Minerals (kg)','體脂肪量 Fat Mass (kg)','除脂體重 FFM (kg)','內臟脂肪 Visceral Fat','腰臀比 WHR','ECW Ratio'],
+    ibTbw: '體水分 TBW', ibProtein: '蛋白質', ibMinerals: '礦物質', ibFatmass: '體脂肪量',
+    ibFfm: '除脂體重', ibVisceral: '內臟脂肪', ibWhr: '腰臀比', ibEcw: 'ECW Ratio',
+    ibAdvancedToggle: '顯示進階數據 ▼',
+    ibAdvancedToggleOpen: '隱藏進階數據 ▲',
+    ibHistoryLabel: '歷史記錄',
+    ibHistoryEmpty: '需要更多記錄才能比較',
+    ibTrendTitle: '趨勢分析',
     myGoalLabel: '我的目標',
   },
   en: {
@@ -944,6 +1035,14 @@ const T = {
     goalSessions: (done,total,left) => `${done} of ${total} sessions · ${done>=total ? '🎉 Goal reached!' : `${left} more to go`}`,
     muscleLabels: ['Chest','Back','Legs','Shoulder','Biceps','Triceps','Core','Cardio'],
     ibLabelFields: ['InBody Score','Weight (kg)','Muscle (kg)','Body Fat (%)','BMR (kcal)','Height (cm)'],
+    ibAdvancedLabels: ['TBW (L)','Protein (kg)','Minerals (kg)','Fat Mass (kg)','FFM (kg)','Visceral Fat','WHR','ECW Ratio'],
+    ibTbw: 'TBW', ibProtein: 'Protein', ibMinerals: 'Minerals', ibFatmass: 'Fat Mass',
+    ibFfm: 'FFM', ibVisceral: 'Visceral Fat', ibWhr: 'WHR', ibEcw: 'ECW Ratio',
+    ibAdvancedToggle: 'Show Advanced ▼',
+    ibAdvancedToggleOpen: 'Hide Advanced ▲',
+    ibHistoryLabel: 'History',
+    ibHistoryEmpty: 'Need more records to compare',
+    ibTrendTitle: 'Trend Analysis',
     myGoalLabel: 'My Goal',
   }
 };
@@ -1054,7 +1153,7 @@ function applyLang() {
     if(s[key]) { el.textContent = s[key]; if(key==='settingsDanger') el.style.color='#c0392b'; }
   });
 
-  renderHome(); renderEquip(); renderLog(); renderInBody(); setupGoalChips();
+  renderHome(); renderEquip(); renderLog(); renderInBody(); renderHistory(); setupGoalChips();
 }
 
 // ─── INIT ───
@@ -1085,7 +1184,7 @@ function showApp() {
   document.getElementById('user-avatar').textContent = userName.charAt(0).toUpperCase();
   document.getElementById('settings-name-display').textContent = userName;
   document.getElementById('key-input').value = apiKey;
-  renderHome(); renderEquip(); renderLog(); renderInBody();
+  renderHome(); renderEquip(); renderLog(); renderInBody(); renderHistory();
   setupGoalChips(); applyLang();
 }
 
@@ -1274,6 +1373,19 @@ function renderLog() {
   }
 }
 
+const IMPROVE_DIR = { muscle:1, fat:-1, bmr:1, weight:0, tbw:1, protein:1, minerals:1, fatmass:-1, ffm:1, visceral:-1, whr:-1, ecw:-1 };
+
+function deltaHtml(field, last, prev) {
+  if (!prev || !last[field] || !prev[field]) return '';
+  const diff = (parseFloat(last[field]) - parseFloat(prev[field])).toFixed(1);
+  if (parseFloat(diff) === 0) return '';
+  const dir = IMPROVE_DIR[field];
+  let cls = 'neutral';
+  if (dir === 1) cls = diff > 0 ? 'good' : 'bad';
+  else if (dir === -1) cls = diff < 0 ? 'good' : 'bad';
+  return `<span class="ib-delta ${cls}">${diff > 0 ? '+' : ''}${diff}</span>`;
+}
+
 function renderInBody() {
   const last = inbodyRecords[inbodyRecords.length - 1];
   const ibNoRec = document.getElementById('ib-date');
@@ -1288,12 +1400,43 @@ function renderInBody() {
     badge.textContent = (diff > 0 ? '↑ +' : '↓ ') + diff;
   }
   const s = T[lang];
-  document.getElementById('ib-grid').innerHTML = `
-    <div class="ib-box"><div class="ib-val">${last.muscle||'--'}<span class="ib-unit">kg</span></div><div class="ib-key">${s.ibMuscle}</div></div>
-    <div class="ib-box"><div class="ib-val">${last.fat||'--'}<span class="ib-unit">%</span></div><div class="ib-key">${s.ibFat}</div></div>
-    <div class="ib-box"><div class="ib-val">${last.bmr||'--'}<span class="ib-unit">kcal</span></div><div class="ib-key">${s.ibBMR}</div></div>
-    <div class="ib-box"><div class="ib-val">${last.weight||'--'}<span class="ib-unit">kg</span></div><div class="ib-key">${s.ibWeight}</div></div>
+  // primary 4 metrics (2-col)
+  let gridHtml = `
+    <div class="ib-box"><div class="ib-val">${last.muscle||'--'}<span class="ib-unit">kg</span>${deltaHtml('muscle',last,prev)}</div><div class="ib-key">${s.ibMuscle}</div></div>
+    <div class="ib-box"><div class="ib-val">${last.fat||'--'}<span class="ib-unit">%</span>${deltaHtml('fat',last,prev)}</div><div class="ib-key">${s.ibFat}</div></div>
+    <div class="ib-box"><div class="ib-val">${last.bmr||'--'}<span class="ib-unit">kcal</span>${deltaHtml('bmr',last,prev)}</div><div class="ib-key">${s.ibBMR}</div></div>
+    <div class="ib-box"><div class="ib-val">${last.weight||'--'}<span class="ib-unit">kg</span>${deltaHtml('weight',last,prev)}</div><div class="ib-key">${s.ibWeight}</div></div>
   `;
+  document.getElementById('ib-grid').innerHTML = gridHtml;
+
+  // secondary metrics (3-col) — only show non-null
+  const secondaryFields = [
+    { key:'tbw', unit:'L', label: s.ibTbw },
+    { key:'protein', unit:'kg', label: s.ibProtein },
+    { key:'minerals', unit:'kg', label: s.ibMinerals },
+    { key:'fatmass', unit:'kg', label: s.ibFatmass },
+    { key:'ffm', unit:'kg', label: s.ibFfm },
+    { key:'visceral', unit:'', label: s.ibVisceral },
+    { key:'whr', unit:'', label: s.ibWhr },
+    { key:'ecw', unit:'', label: s.ibEcw },
+  ];
+  const secondaryItems = secondaryFields.filter(f => last[f.key]);
+  let secGrid = document.getElementById('ib-grid-secondary');
+  if (!secGrid) {
+    secGrid = document.createElement('div');
+    secGrid.id = 'ib-grid-secondary';
+    secGrid.className = 'ib-grid-secondary';
+    document.getElementById('ib-grid').parentNode.appendChild(secGrid);
+  }
+  if (secondaryItems.length > 0) {
+    secGrid.style.display = 'grid';
+    secGrid.innerHTML = secondaryItems.map(f =>
+      `<div class="ib-box-sm"><div class="ib-val">${last[f.key]}<span class="ib-unit">${f.unit}</span>${deltaHtml(f.key,last,prev)}</div><div class="ib-key">${f.label}</div></div>`
+    ).join('');
+  } else {
+    secGrid.style.display = 'none';
+    secGrid.innerHTML = '';
+  }
 }
 
 // ─── INBODY IMAGE SCAN ───
@@ -1320,10 +1463,10 @@ async function scanInBodyImage(event) {
 
     const prompt = lang === 'zh'
       ? `請仔細分析這張InBody體成分報告圖片，提取以下數據並只以JSON格式回覆，不要有其他文字：
-{"score": "InBody分數", "weight": "體重kg", "muscle": "骨骼肌肉量kg", "fat": "體脂率%", "bmr": "基礎代謝率kcal", "height": "身高cm（如有）"}
+{"score": "InBody分數", "weight": "體重kg", "muscle": "骨骼肌肉量kg", "fat": "體脂率%", "bmr": "基礎代謝率kcal", "height": "身高cm（如有）", "tbw": "體水分L", "protein": "蛋白質kg", "minerals": "礦物質kg", "fatmass": "體脂肪量kg", "ffm": "除脂體重kg", "visceral": "內臟脂肪等級", "whr": "腰臀比", "ecw": "ECW比率"}
 如果某個數值找不到，填null。只回覆JSON，不要任何說明文字。`
       : `Carefully analyze this InBody body composition report image and extract the following data. Reply ONLY with JSON, no other text:
-{"score": "InBody score number", "weight": "weight in kg", "muscle": "skeletal muscle mass in kg", "fat": "body fat percentage", "bmr": "basal metabolic rate kcal", "height": "height in cm if available"}
+{"score": "InBody score number", "weight": "weight in kg", "muscle": "skeletal muscle mass in kg", "fat": "body fat percentage", "bmr": "basal metabolic rate kcal", "height": "height in cm if available", "tbw": "total body water in L", "protein": "protein in kg", "minerals": "minerals in kg", "fatmass": "fat mass in kg", "ffm": "fat free mass in kg", "visceral": "visceral fat level", "whr": "waist-hip ratio", "ecw": "ECW ratio"}
 If a value cannot be found, use null. Reply ONLY with JSON, no explanations.`;
 
     try {
@@ -1349,6 +1492,21 @@ If a value cannot be found, use null. Reply ONLY with JSON, no explanations.`;
       if (extracted.fat) document.getElementById('ib-input-fat').value = extracted.fat;
       if (extracted.bmr) document.getElementById('ib-input-bmr').value = extracted.bmr;
       if (extracted.height) document.getElementById('ib-input-height').value = extracted.height;
+      if (extracted.tbw) document.getElementById('ib-input-tbw').value = extracted.tbw;
+      if (extracted.protein) document.getElementById('ib-input-protein').value = extracted.protein;
+      if (extracted.minerals) document.getElementById('ib-input-minerals').value = extracted.minerals;
+      if (extracted.fatmass) document.getElementById('ib-input-fatmass').value = extracted.fatmass;
+      if (extracted.ffm) document.getElementById('ib-input-ffm').value = extracted.ffm;
+      if (extracted.visceral) document.getElementById('ib-input-visceral').value = extracted.visceral;
+      if (extracted.whr) document.getElementById('ib-input-whr').value = extracted.whr;
+      if (extracted.ecw) document.getElementById('ib-input-ecw').value = extracted.ecw;
+      // auto-open advanced fields if any advanced data was found
+      const hasAdvanced = extracted.tbw || extracted.protein || extracted.minerals || extracted.fatmass || extracted.ffm || extracted.visceral || extracted.whr || extracted.ecw;
+      if (hasAdvanced) {
+        const advDiv = document.getElementById('ib-advanced-fields');
+        advDiv.classList.add('open');
+        document.getElementById('ib-advanced-toggle').textContent = t('ibAdvancedToggleOpen');
+      }
 
       zone.classList.remove('scanning');
       zone.classList.add('done');
@@ -1365,6 +1523,70 @@ If a value cannot be found, use null. Reply ONLY with JSON, no explanations.`;
     }
   };
   reader.readAsDataURL(file);
+}
+
+function toggleAdvancedFields() {
+  const div = document.getElementById('ib-advanced-fields');
+  const btn = document.getElementById('ib-advanced-toggle');
+  if (div.classList.contains('open')) {
+    div.classList.remove('open');
+    btn.textContent = t('ibAdvancedToggle');
+  } else {
+    div.classList.add('open');
+    btn.textContent = t('ibAdvancedToggleOpen');
+  }
+}
+
+function renderHistory() {
+  const wrap = document.getElementById('ib-history');
+  const label = document.getElementById('ib-history-label');
+  if (!inbodyRecords.length) {
+    wrap.classList.remove('show');
+    label.style.display = 'none';
+    return;
+  }
+  label.style.display = 'block';
+  label.textContent = t('ibHistoryLabel');
+  wrap.classList.add('show');
+
+  if (inbodyRecords.length < 2) {
+    wrap.innerHTML = `<div class="ib-history-empty">${t('ibHistoryEmpty')}</div>`;
+    return;
+  }
+
+  const s = T[lang];
+  const recent = inbodyRecords.slice(-10).reverse();
+  const metricLabels = { score:'Score', muscle:s.ibMuscle, fat:s.ibFat, weight:s.ibWeight, bmr:s.ibBMR };
+  let html = '';
+  recent.forEach((rec, idx) => {
+    const realIdx = inbodyRecords.length - 1 - idx;
+    const prevRec = realIdx > 0 ? inbodyRecords[realIdx - 1] : null;
+    const dateStr = new Date(rec.date).toLocaleDateString(lang==='zh'?'zh-TW':'en-US');
+    let chips = '';
+    ['muscle','fat','weight','bmr'].forEach(f => {
+      if (!rec[f]) return;
+      let chipDelta = '';
+      if (prevRec && prevRec[f]) {
+        const d = (parseFloat(rec[f]) - parseFloat(prevRec[f])).toFixed(1);
+        if (parseFloat(d) !== 0) {
+          const dir = IMPROVE_DIR[f];
+          let cls = 'neutral';
+          if (dir === 1) cls = d > 0 ? 'good' : 'bad';
+          else if (dir === -1) cls = d < 0 ? 'good' : 'bad';
+          chipDelta = `<span class="ib-delta ${cls}">${d > 0 ? '+' : ''}${d}</span>`;
+        }
+      }
+      chips += `<div class="ib-record-chip">${metricLabels[f]}: ${rec[f]}${chipDelta}</div>`;
+    });
+    html += `<div class="ib-record-card">
+      <div class="ib-record-card-head">
+        <div class="ib-record-card-date">${dateStr}</div>
+        <div class="ib-record-card-score">${rec.score || '--'}</div>
+      </div>
+      <div class="ib-record-chips">${chips}</div>
+    </div>`;
+  });
+  wrap.innerHTML = html;
 }
 
 function setupGoalChips() {
@@ -1411,6 +1633,19 @@ function saveWorkout() {
   });
 }
 
+function computeTrends(records) {
+  if (records.length < 2) return null;
+  const recent = records.slice(-5);
+  const oldest = recent[0], newest = recent[recent.length - 1];
+  const days = Math.round((new Date(newest.date) - new Date(oldest.date)) / 86400000);
+  const fields = ['score','weight','muscle','fat','bmr','tbw','protein','fatmass','ffm','visceral','whr','ecw'];
+  const changes = {};
+  fields.forEach(f => {
+    if (newest[f] && oldest[f]) changes[f] = { from: parseFloat(oldest[f]), to: parseFloat(newest[f]), delta: +(parseFloat(newest[f]) - parseFloat(oldest[f])).toFixed(2) };
+  });
+  return { days, count: records.length, changes };
+}
+
 async function analyzeInBody() {
   const score = document.getElementById('ib-input-score').value;
   const weight = document.getElementById('ib-input-weight').value;
@@ -1418,6 +1653,14 @@ async function analyzeInBody() {
   const fat = document.getElementById('ib-input-fat').value;
   const bmr = document.getElementById('ib-input-bmr').value;
   const height = document.getElementById('ib-input-height').value;
+  const tbw = document.getElementById('ib-input-tbw').value.trim();
+  const protein = document.getElementById('ib-input-protein').value.trim();
+  const minerals = document.getElementById('ib-input-minerals').value.trim();
+  const fatmass = document.getElementById('ib-input-fatmass').value.trim();
+  const ffm = document.getElementById('ib-input-ffm').value.trim();
+  const visceral = document.getElementById('ib-input-visceral').value.trim();
+  const whr = document.getElementById('ib-input-whr').value.trim();
+  const ecw = document.getElementById('ib-input-ecw').value.trim();
 
   if (!score || !weight || !muscle || !fat) {
     showToast(t('toastFillIb'));
@@ -1427,9 +1670,18 @@ async function analyzeInBody() {
 
   // save record
   const record = { score, weight, muscle, fat, bmr, height, goal: selectedGoal, date: new Date().toISOString() };
+  if (tbw) record.tbw = tbw;
+  if (protein) record.protein = protein;
+  if (minerals) record.minerals = minerals;
+  if (fatmass) record.fatmass = fatmass;
+  if (ffm) record.ffm = ffm;
+  if (visceral) record.visceral = visceral;
+  if (whr) record.whr = whr;
+  if (ecw) record.ecw = ecw;
   inbodyRecords.push(record);
   localStorage.setItem('d1_inbody', JSON.stringify(inbodyRecords));
   renderInBody();
+  renderHistory();
 
   // show AI panel
   const resultDiv = document.getElementById('ai-result');
@@ -1438,6 +1690,15 @@ async function analyzeInBody() {
   resultDiv.classList.add('show');
   labelDiv.style.display = 'block';
   bodyDiv.innerHTML = '<span class="ai-loading">🤖 AI分析緊你的數據，請稍等...</span>';
+
+  const trends = computeTrends(inbodyRecords);
+  let trendText = '';
+  if (trends) {
+    trendText = `\n\n趨勢數據 Trend Data (${trends.count} records over ${trends.days} days):\n`;
+    Object.entries(trends.changes).forEach(([k,v]) => {
+      trendText += `- ${k}: ${v.from} → ${v.to} (${v.delta > 0 ? '+' : ''}${v.delta})\n`;
+    });
+  }
 
   const prompt = `你係一個專業健身教練同營養師。請用繁體中文同英文（雙語）分析以下InBody數據，並提供詳細訓練建議。
 
@@ -1448,14 +1709,23 @@ async function analyzeInBody() {
 - 體脂率 Body Fat: ${fat}%
 - 基礎代謝率 BMR: ${bmr || '未提供'}kcal
 - 身高 Height: ${height || '未提供'}cm
+- 體水分 TBW: ${tbw || '未提供'}L
+- 蛋白質 Protein: ${protein || '未提供'}kg
+- 礦物質 Minerals: ${minerals || '未提供'}kg
+- 體脂肪量 Fat Mass: ${fatmass || '未提供'}kg
+- 除脂體重 FFM: ${ffm || '未提供'}kg
+- 內臟脂肪 Visceral Fat: ${visceral || '未提供'}
+- 腰臀比 WHR: ${whr || '未提供'}
+- ECW Ratio: ${ecw || '未提供'}
 - 目標 Goal: ${selectedGoal}
-
+${trendText}
 請提供：
 1. 📊 數據解讀 Data Analysis（係唔係健康範圍？）
-2. 🎯 訓練建議 Training Recommendations（每週幾次？咩split？）
-3. 🏋️ 重點訓練部位 Priority Muscle Groups
-4. 🥗 營養建議 Nutrition Tips（蛋白質目標、熱量建議）
-5. 📅 8週訓練計劃概覽 8-Week Plan Overview
+2. 📈 趨勢分析 Trend Analysis（如有趨勢數據，分析變化方向同建議）
+3. 🎯 訓練建議 Training Recommendations（每週幾次？咩split？）
+4. 🏋️ 重點訓練部位 Priority Muscle Groups
+5. 🥗 營養建議 Nutrition Tips（蛋白質目標、熱量建議）
+6. 📅 8週訓練計劃概覽 8-Week Plan Overview
 
 請用清晰易讀嘅格式，emoji輔助，中英雙語。`;
 
@@ -1465,7 +1735,7 @@ async function analyzeInBody() {
 
   try {
     const contents = [{ parts: [{ text: prompt }] }];
-    const data = await callGemini(apiKey, contents, 1500);
+    const data = await callGemini(apiKey, contents, 2000);
     bodyDiv.textContent = data.candidates[0].content.parts[0].text;
     showToast(t('toastAIDone'));
   } catch (e) {
