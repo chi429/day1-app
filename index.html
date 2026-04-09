@@ -1439,6 +1439,27 @@ function renderInBody() {
   }
 }
 
+// ─── IMAGE COMPRESSION ───
+function compressImage(file, maxDim) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      let w = img.width, h = img.height;
+      if (Math.max(w, h) > maxDim) {
+        const scale = maxDim / Math.max(w, h);
+        w = Math.round(w * scale);
+        h = Math.round(h * scale);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      resolve(dataUrl);
+    };
+    img.src = URL.createObjectURL(file);
+  });
+}
+
 // ─── INBODY IMAGE SCAN ───
 async function scanInBodyImage(event) {
   const file = event.target.files[0];
@@ -1447,30 +1468,26 @@ async function scanInBodyImage(event) {
 
   // show preview
   const preview = document.getElementById('scan-preview');
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    const base64 = e.target.result;
-    preview.src = base64;
-    preview.style.display = 'block';
+  const zone = document.getElementById('scan-zone');
+  zone.classList.add('scanning');
+  document.getElementById('scan-title').textContent = lang === 'zh' ? '🤖 壓縮圖片中...' : '🤖 Compressing image...';
+  document.getElementById('scan-sub').textContent = lang === 'zh' ? '請稍等' : 'Please wait';
 
-    const zone = document.getElementById('scan-zone');
-    zone.classList.add('scanning');
-    document.getElementById('scan-title').textContent = lang === 'zh' ? '🤖 AI讀取緊數據...' : '🤖 AI reading data...';
-    document.getElementById('scan-sub').textContent = lang === 'zh' ? '請稍等，自動填入所有欄位' : 'Please wait, auto-filling all fields';
+  // Compress image via canvas (handles HEIC, resizes large photos)
+  const compressed = await compressImage(file, 1600);
+  preview.src = compressed;
+  preview.style.display = 'block';
 
-    const imgData = base64.split(',')[1];
-    // Map HEIC/HEIF to supported mime type; fallback to jpeg
-    let mediaType = file.type || 'image/jpeg';
-    if (mediaType === 'image/heic' || mediaType === 'image/heif') mediaType = 'image/jpeg';
-    if (!mediaType.startsWith('image/')) mediaType = 'image/jpeg';
+  document.getElementById('scan-title').textContent = lang === 'zh' ? '🤖 AI讀取緊數據...' : '🤖 AI reading data...';
+  document.getElementById('scan-sub').textContent = lang === 'zh' ? '請稍等，自動填入所有欄位' : 'Please wait, auto-filling all fields';
 
-    const prompt = lang === 'zh'
-      ? `請仔細分析這張InBody體成分報告圖片，提取以下數據並只以JSON格式回覆，不要有其他文字：
-{"score": "InBody分數", "weight": "體重kg", "muscle": "骨骼肌肉量kg", "fat": "體脂率%", "bmr": "基礎代謝率kcal", "height": "身高cm（如有）", "tbw": "體水分L", "protein": "蛋白質kg", "minerals": "礦物質kg", "fatmass": "體脂肪量kg", "ffm": "除脂體重kg", "visceral": "內臟脂肪等級", "whr": "腰臀比", "ecw": "ECW比率"}
-如果某個數值找不到，填null。只回覆JSON，不要任何說明文字。`
-      : `Carefully analyze this InBody body composition report image and extract the following data. Reply ONLY with JSON, no other text:
-{"score": "InBody score number", "weight": "weight in kg", "muscle": "skeletal muscle mass in kg", "fat": "body fat percentage", "bmr": "basal metabolic rate kcal", "height": "height in cm if available", "tbw": "total body water in L", "protein": "protein in kg", "minerals": "minerals in kg", "fatmass": "fat mass in kg", "ffm": "fat free mass in kg", "visceral": "visceral fat level", "whr": "waist-hip ratio", "ecw": "ECW ratio"}
-If a value cannot be found, use null. Reply ONLY with JSON, no explanations.`;
+  const imgData = compressed.split(',')[1];
+  const mediaType = 'image/jpeg';
+
+    const prompt = `This is an InBody body composition report. The image may be rotated — read it in the correct orientation.
+Extract these values as numbers only (no units). Reply with ONLY a JSON object, no other text:
+{"score":"InBody Score (out of 100)","weight":"Weight in kg","muscle":"Skeletal Muscle Mass in kg","fat":"Percent Body Fat (PBF) number only","bmr":"Basal Metabolic Rate in kcal","height":"Height in cm","tbw":"Total Body Water in L","protein":"Protein in kg","minerals":"Mineral in kg","fatmass":"Body Fat Mass in kg","ffm":"Fat Free Mass (= Weight minus Body Fat Mass) in kg","visceral":"Visceral Fat Level (number 1-20)","whr":"Waist-Hip Ratio (e.g. 0.85)","ecw":"ECW/TBW ratio (e.g. 0.380)"}
+Use null for values not found. Numbers only, no units in values. JSON only.`;
 
     try {
       const contents = [{
@@ -1529,8 +1546,6 @@ If a value cannot be found, use null. Reply ONLY with JSON, no explanations.`;
       document.getElementById('scan-sub').textContent = err.message || (lang === 'zh' ? '讀取失敗，請手動輸入' : 'Scan failed, please enter manually');
       showToast(lang === 'zh' ? '讀取失敗：' + err.message : 'Scan failed: ' + err.message);
     }
-  };
-  reader.readAsDataURL(file);
 }
 
 function toggleAdvancedFields() {
