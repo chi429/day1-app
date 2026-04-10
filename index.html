@@ -1440,24 +1440,21 @@ function renderInBody() {
 }
 
 // ─── IMAGE COMPRESSION ───
-function compressImage(file, maxDim) {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => {
-      let w = img.width, h = img.height;
-      if (Math.max(w, h) > maxDim) {
-        const scale = maxDim / Math.max(w, h);
-        w = Math.round(w * scale);
-        h = Math.round(h * scale);
-      }
-      const canvas = document.createElement('canvas');
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-      resolve(dataUrl);
-    };
-    img.src = URL.createObjectURL(file);
-  });
+async function compressImage(file, maxDim) {
+  const blob = file.slice ? file : new Blob([file]);
+  // createImageBitmap is faster than Image() for large files
+  const bmp = await createImageBitmap(blob);
+  let w = bmp.width, h = bmp.height;
+  if (Math.max(w, h) > maxDim) {
+    const scale = maxDim / Math.max(w, h);
+    w = Math.round(w * scale);
+    h = Math.round(h * scale);
+  }
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  canvas.getContext('2d').drawImage(bmp, 0, 0, w, h);
+  bmp.close();
+  return canvas.toDataURL('image/jpeg', 0.7);
 }
 
 // ─── INBODY IMAGE SCAN ───
@@ -1474,7 +1471,7 @@ async function scanInBodyImage(event) {
   document.getElementById('scan-sub').textContent = lang === 'zh' ? '請稍等' : 'Please wait';
 
   // Compress image via canvas (handles HEIC, resizes large photos)
-  const compressed = await compressImage(file, 1600);
+  const compressed = await compressImage(file, 1024);
   preview.src = compressed;
   preview.style.display = 'block';
 
